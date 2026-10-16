@@ -1,7 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
   const STORAGE_PREFIX = 'mutant-comms:';
+  const PROFILE_META_KEY = `${STORAGE_PREFIX}profile:metadata`;
+  const SPICY_MODE_KEY = `${STORAGE_PREFIX}settings:spicy`;
+  const AVATAR_DB_NAME = 'mutant-comms-profile';
   const REACTIONS = ['❤️', '😂', '👍', '😮', '😢', '❗'];
   const MAX_MESSAGE_LENGTH = 1200;
+  const MAX_AVATAR_FILE_SIZE = 8 * 1024 * 1024;
+  const AVATAR_SIZE = 512;
+  const PROFILE_VIBES = ['', 'Funny', 'Serious', 'Mysterious', 'Stylish', 'Chaotic'];
   const LEGACY_AUTHOR_NAMES = {
     Oriana: 'Storm',
     Loren: 'Wolverine',
@@ -17,6 +23,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const conversation = phone?.dataset.conversationId ||
     pageTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const isChatPage = Boolean(document.querySelector('.chat-messages'));
+  let profileImageUrl = '';
+  let currentProfileMeta = normalizeProfileMeta(readStorage(PROFILE_META_KEY, {
+    revision: 0,
+    acknowledgedRevision: 0,
+    lastReactionAt: 0,
+    hasPicture: false,
+    vibe: ''
+  }));
+  let spicyMode = readStorage(SPICY_MODE_KEY, false) === true;
 
   function readStorage(key, fallback) {
     try {
@@ -36,6 +51,26 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error(`MutantComms could not save localStorage key "${key}".`, error);
       return false;
     }
+
+  }
+
+  function normalizeProfileMeta(value, fallback = null) {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+      console.error('MutantComms found invalid saved profile metadata.');
+      return fallback || { revision: 0, acknowledgedRevision: 0, lastReactionAt: 0, hasPicture: false, vibe: '' };
+    }
+    const vibe = PROFILE_VIBES.includes(value.vibe) ? value.vibe : '';
+    if (value.vibe && !PROFILE_VIBES.includes(value.vibe)) {
+      console.error('MutantComms found an unsupported saved avatar vibe.');
+    }
+    return {
+      ...value,
+      revision: Math.max(0, Number(value.revision) || 0),
+      acknowledgedRevision: Math.max(0, Number(value.acknowledgedRevision) || 0),
+      lastReactionAt: Math.max(0, Number(value.lastReactionAt) || 0),
+      hasPicture: value.hasPicture === true,
+      vibe
+    };
   }
 
   function hash(value) {
@@ -61,6 +96,141 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function displayAuthor(name) {
     return LEGACY_AUTHOR_NAMES[name] || name;
+  }
+
+  function avatarInitials(name) {
+    if (name === 'You') return 'YOU';
+    if (name === 'Gold Squad') return 'GS';
+    return String(name || '?').split(/\s+/).slice(0, 2).map((part) => part[0] || '').join('').toUpperCase();
+  }
+
+  function decorateAvatar(element, name, isUser = false) {
+    if (!element) return;
+    element.dataset.avatarFor = isUser ? 'You' : name;
+    const avatarColors = {
+      You: '#3158bf',
+      Wolverine: '#806020',
+      Deadpool: '#9a2933',
+      Storm: '#5661a7',
+      Cable: '#53606d',
+      'Gold Squad': '#786631'
+    };
+    element.style.setProperty('--avatar-bg', avatarColors[isUser ? 'You' : name] || '#596579');
+    element.textContent = isUser ? 'YOU' : avatarInitials(name);
+    element.style.backgroundImage = '';
+    if (isUser && profileImageUrl) {
+      element.textContent = '';
+      element.style.backgroundImage = `url("${profileImageUrl}")`;
+    }
+  }
+
+  function decorateVisibleAvatars() {
+    document.querySelectorAll('.message-avatar').forEach((avatar) => {
+      const isUser = avatar.dataset.avatarFor === 'You';
+      decorateAvatar(avatar, avatar.dataset.avatarFor, isUser);
+    });
+    document.querySelectorAll('.conversation-item').forEach((item) => {
+      const avatar = item.querySelector('.avatar');
+      const title = item.querySelector('.conversation-top h3')?.textContent.trim() || '';
+      decorateAvatar(avatar, title, false);
+    });
+    const headingAvatar = document.querySelector('.chat-user .group-avatar');
+    if (headingAvatar) {
+      const heading = pageTitle || 'Gold Squad';
+      decorateAvatar(headingAvatar, heading, false);
+    }
+  }
+
+  function openAvatarDatabase() {
+    return new Promise((resolve, reject) => {
+      if (!('indexedDB' in window)) {
+        reject(new Error('This browser does not support local profile-picture storage.'));
+        return;
+      }
+      const request = indexedDB.open(AVATAR_DB_NAME, 1);
+      request.onupgradeneeded = () => {
+        if (!request.result.objectStoreNames.contains('avatars')) {
+          request.result.createObjectStore('avatars');
+        }
+      };
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error || new Error('Could not open local profile-picture storage.'));
+      request.onblocked = () => reject(new Error('Profile-picture storage is blocked by another open tab.'));
+    });
+  }
+
+  async function readProfilePicture() {
+    const database = await openAvatarDatabase();
+    return new Promise((resolve, reject) => {
+      const transaction = database.transaction('avatars', 'readonly');
+      const request = transaction.objectStore('avatars').get('profile');
+      request.onsuccess = () => resolve(request.result || null);
+      request.onerror = () => reject(request.error || new Error('Could not load the saved profile picture.'));
+      transaction.oncomplete = () => database.close();
+      transaction.onerror = () => {
+        database.close();
+        reject(transaction.error || new Error('Could not read profile-picture storage.'));
+      };
+    });
+  }
+
+  async function writeProfilePicture(blob) {
+    const database = await openAvatarDatabase();
+    return new Promise((resolve, reject) => {
+      const transaction = database.transaction('avatars', 'readwrite');
+      transaction.objectStore('avatars').put(blob, 'profile');
+      transaction.oncomplete = () => {
+        database.close();
+        resolve();
+      };
+      transaction.onerror = () => {
+        database.close();
+        reject(transaction.error || new Error('Could not save the profile picture.'));
+      };
+      transaction.onabort = () => {
+        database.close();
+        reject(transaction.error || new Error('Saving the profile picture was interrupted.'));
+      };
+    });
+  }
+
+  async function deleteProfilePicture() {
+    const database = await openAvatarDatabase();
+    return new Promise((resolve, reject) => {
+      const transaction = database.transaction('avatars', 'readwrite');
+      transaction.objectStore('avatars').delete('profile');
+      transaction.oncomplete = () => {
+        database.close();
+        resolve();
+      };
+      transaction.onerror = () => {
+        database.close();
+        reject(transaction.error || new Error('Could not remove the profile picture.'));
+      };
+      transaction.onabort = () => {
+        database.close();
+        reject(transaction.error || new Error('Removing the profile picture was interrupted.'));
+      };
+    });
+  }
+
+  function useProfilePicture(blob) {
+    if (profileImageUrl) URL.revokeObjectURL(profileImageUrl);
+    profileImageUrl = blob instanceof Blob ? URL.createObjectURL(blob) : '';
+    decorateVisibleAvatars();
+    const preview = document.querySelector('.profile-picture-preview');
+    if (preview) {
+      if (profileImageUrl) {
+        preview.src = profileImageUrl;
+        preview.hidden = false;
+        document.querySelector('.profile-picture-placeholder').hidden = true;
+      } else {
+        preview.removeAttribute('src');
+        preview.hidden = true;
+        const placeholder = document.querySelector('.profile-picture-placeholder');
+        if (placeholder) placeholder.hidden = false;
+      }
+    }
   }
 
   function conversationItemId(item) {
@@ -126,6 +296,279 @@ document.addEventListener('DOMContentLoaded', () => {
       return rightActivity - leftActivity || originalOrder.get(left) - originalOrder.get(right);
     });
     list.append(...items);
+  }
+
+  function createSettingsElement(tag, className = '', text = '') {
+    const element = document.createElement(tag);
+    if (className) element.className = className;
+    if (text) element.textContent = text;
+    return element;
+  }
+
+  function createSettingsPanel() {
+    const shell = document.querySelector('.phone-shell');
+    if (!shell) return null;
+    let trigger = document.querySelector('.settings-button');
+    if (!trigger) {
+      trigger = createSettingsElement('button', 'settings-button chat-settings-button');
+      trigger.type = 'button';
+      trigger.setAttribute('aria-label', 'Settings');
+      const info = shell.querySelector('.info-button');
+      if (info) info.before(trigger);
+      else shell.querySelector('.chat-header-row')?.append(trigger);
+    }
+
+    const panel = createSettingsElement('aside', 'settings-panel');
+    panel.id = 'mutant-comms-settings';
+    panel.hidden = true;
+    panel.setAttribute('aria-label', 'Settings');
+    panel.setAttribute('aria-live', 'polite');
+
+    const heading = createSettingsElement('h2', '', 'Settings');
+    const close = createSettingsElement('button', 'settings-close', '×');
+    close.type = 'button';
+    close.setAttribute('aria-label', 'Close settings');
+    const titleRow = createSettingsElement('div', 'settings-title-row');
+    titleRow.append(heading, close);
+
+    const profileHeading = createSettingsElement('h3', '', 'Your profile picture');
+    const profileRow = createSettingsElement('div', 'profile-picture-row');
+    const previewWrap = createSettingsElement('div', 'profile-picture-wrap');
+    const placeholder = createSettingsElement('span', 'profile-picture-placeholder', 'YOU');
+    const preview = createSettingsElement('img', 'profile-picture-preview');
+    preview.alt = 'Preview of your profile picture';
+    preview.hidden = true;
+    previewWrap.append(placeholder, preview);
+    const fileLabel = createSettingsElement('label', 'profile-upload-label', 'Choose JPG, PNG or WebP');
+    const fileInput = createSettingsElement('input', 'profile-upload');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/jpeg,image/png,image/webp';
+    fileInput.setAttribute('aria-label', 'Choose a profile picture');
+    fileLabel.append(fileInput);
+    profileRow.append(previewWrap, fileLabel);
+
+    const vibeLabel = createSettingsElement('label', 'settings-field', 'Avatar vibe (optional)');
+    const vibe = createSettingsElement('select', 'profile-vibe');
+    vibe.setAttribute('aria-label', 'Avatar vibe');
+    [['', 'Choose a vibe'], ['Funny', 'Funny'], ['Serious', 'Serious'], ['Mysterious', 'Mysterious'],
+      ['Stylish', 'Stylish'], ['Chaotic', 'Chaotic']].forEach(([value, label]) => {
+      const option = createSettingsElement('option', '', label);
+      option.value = value;
+      vibe.append(option);
+    });
+    vibeLabel.append(vibe);
+
+    const spicyLabel = createSettingsElement('label', 'settings-toggle-label');
+    const spicy = createSettingsElement('input', 'spicy-mode-toggle');
+    spicy.type = 'checkbox';
+    spicyLabel.append(spicy, createSettingsElement('span', '', 'Spicy Mode'));
+
+    const actions = createSettingsElement('div', 'settings-actions');
+    const save = createSettingsElement('button', 'settings-save', 'Save profile');
+    save.type = 'button';
+    const remove = createSettingsElement('button', 'settings-remove', 'Remove picture');
+    remove.type = 'button';
+    actions.append(save, remove);
+    const status = createSettingsElement('p', 'settings-status');
+    status.setAttribute('role', 'status');
+    panel.append(titleRow, profileHeading, profileRow, vibeLabel, spicyLabel, actions, status);
+    shell.append(panel);
+    trigger.setAttribute('aria-controls', panel.id);
+    trigger.setAttribute('aria-expanded', 'false');
+
+    let pendingAvatarBlob = null;
+    let stagedPreviewUrl = '';
+    let avatarLoadRevision = 0;
+    const setStatus = (message) => { status.textContent = message; };
+    const refreshProfilePicture = () => {
+      const loadRevision = ++avatarLoadRevision;
+      readProfilePicture().then((blob) => {
+        if (loadRevision !== avatarLoadRevision) return;
+        useProfilePicture(blob);
+        remove.disabled = !blob;
+      }).catch((error) => {
+        if (loadRevision !== avatarLoadRevision) return;
+        console.error('MutantComms could not load the local profile picture.', error);
+        setStatus(error.message || 'Could not load the saved profile picture.');
+      });
+    };
+    const setMeta = (hasPicture, nextVibe, avatarChanged) => {
+      const meta = {
+        ...currentProfileMeta,
+        revision: (Number(currentProfileMeta.revision) || 0) + (avatarChanged ? 1 : 0),
+        hasPicture,
+        vibe: nextVibe,
+        updatedAt: Date.now()
+      };
+      if (!writeStorage(PROFILE_META_KEY, meta)) {
+        setStatus('Could not save profile settings. Check this browser’s storage space and privacy settings.');
+        return false;
+      }
+      currentProfileMeta = meta;
+      window.setTimeout(maybePublishAvatarReaction, 500);
+      return true;
+    };
+    const saveSpicyMode = (enabled) => {
+      if (writeStorage(SPICY_MODE_KEY, enabled)) {
+        spicyMode = enabled;
+        setStatus(enabled ? 'Spicy Mode is on.' : 'Spicy Mode is off.');
+      } else {
+        spicy.checked = spicyMode;
+        setStatus('Could not save Spicy Mode. Check this browser’s storage settings.');
+      }
+    };
+    const makeCompressedAvatar = async (file) => {
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+        throw new Error('Choose a JPG, PNG or WebP image.');
+      }
+      if (file.size > MAX_AVATAR_FILE_SIZE) {
+        throw new Error('Choose an image smaller than 8 MB.');
+      }
+      if (typeof createImageBitmap !== 'function') {
+        throw new Error('This browser cannot resize images locally. Try a newer browser.');
+      }
+      const bitmap = await createImageBitmap(file);
+      const scale = Math.min(1, AVATAR_SIZE / Math.max(bitmap.width, bitmap.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+      canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+      const context = canvas.getContext('2d');
+      if (!context) {
+        bitmap.close();
+        throw new Error('Could not prepare the profile picture locally.');
+      }
+      context.fillStyle = '#121721';
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      bitmap.close();
+      return new Promise((resolve, reject) => {
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error('Could not compress the profile picture.'));
+        }, 'image/jpeg', 0.82);
+      });
+    };
+
+    trigger.addEventListener('click', () => {
+      const open = panel.hidden;
+      panel.hidden = !open;
+      trigger.setAttribute('aria-expanded', String(open));
+      if (open) fileInput.focus();
+    });
+    close.addEventListener('click', () => {
+      panel.hidden = true;
+      trigger.setAttribute('aria-expanded', 'false');
+      trigger.focus();
+    });
+    document.addEventListener('click', (event) => {
+      if (!panel.hidden && !panel.contains(event.target) && !trigger.contains(event.target)) {
+        panel.hidden = true;
+        trigger.setAttribute('aria-expanded', 'false');
+      }
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !panel.hidden) {
+        panel.hidden = true;
+        trigger.setAttribute('aria-expanded', 'false');
+        trigger.focus();
+      }
+    });
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files?.[0];
+      if (!file) return;
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+        fileInput.value = '';
+        setStatus('Choose a JPG, PNG or WebP image.');
+        return;
+      }
+      if (file.size > MAX_AVATAR_FILE_SIZE) {
+        fileInput.value = '';
+        setStatus('Choose an image smaller than 8 MB.');
+        return;
+      }
+      pendingAvatarBlob = file;
+      if (stagedPreviewUrl) URL.revokeObjectURL(stagedPreviewUrl);
+      stagedPreviewUrl = URL.createObjectURL(file);
+      preview.src = stagedPreviewUrl;
+      preview.hidden = false;
+      placeholder.hidden = true;
+      setStatus('Preview ready. Save profile to keep it on this device.');
+    });
+    spicy.checked = spicyMode;
+    spicy.addEventListener('change', () => saveSpicyMode(spicy.checked));
+    vibe.value = typeof currentProfileMeta.vibe === 'string' ? currentProfileMeta.vibe : '';
+    save.addEventListener('click', async () => {
+      save.disabled = true;
+      try {
+        const chosenVibe = vibe.value;
+        if (pendingAvatarBlob) {
+          const compressed = await makeCompressedAvatar(pendingAvatarBlob);
+          await writeProfilePicture(compressed);
+          avatarLoadRevision += 1;
+          useProfilePicture(compressed);
+          if (!setMeta(true, chosenVibe, true)) return;
+          remove.disabled = false;
+          pendingAvatarBlob = null;
+          fileInput.value = '';
+          if (stagedPreviewUrl) URL.revokeObjectURL(stagedPreviewUrl);
+          stagedPreviewUrl = '';
+          setStatus('Profile picture saved on this device.');
+          return;
+        }
+        const changedVibe = chosenVibe !== (currentProfileMeta.vibe || '');
+        if (changedVibe) {
+          if (!setMeta(Boolean(currentProfileMeta.hasPicture), chosenVibe, Boolean(currentProfileMeta.hasPicture))) return;
+          setStatus(chosenVibe
+            ? `Vibe saved as ${chosenVibe}. Characters will only use this selected category.`
+            : 'Avatar vibe cleared.');
+        } else {
+          setStatus('Your profile is up to date.');
+        }
+      } catch (error) {
+        console.error('MutantComms could not save the local profile picture.', error);
+        setStatus(error.message || 'Could not save the profile picture locally.');
+      } finally {
+        save.disabled = false;
+      }
+    });
+    remove.addEventListener('click', async () => {
+      remove.disabled = true;
+      avatarLoadRevision += 1;
+      try {
+        await deleteProfilePicture();
+        useProfilePicture(null);
+        remove.disabled = true;
+        pendingAvatarBlob = null;
+        fileInput.value = '';
+        if (stagedPreviewUrl) URL.revokeObjectURL(stagedPreviewUrl);
+        stagedPreviewUrl = '';
+        if (setMeta(false, vibe.value, Boolean(currentProfileMeta.hasPicture))) {
+          setStatus('Profile picture removed from this device.');
+        }
+      } catch (error) {
+        console.error('MutantComms could not remove the local profile picture.', error);
+        setStatus(error.message || 'Could not remove the profile picture locally.');
+        refreshProfilePicture();
+      } finally {
+        remove.disabled = !currentProfileMeta.hasPicture;
+      }
+    });
+
+    window.addEventListener('storage', (event) => {
+      if (event.key === SPICY_MODE_KEY) {
+        spicyMode = event.newValue === 'true';
+        spicy.checked = spicyMode;
+      }
+      if (event.key === PROFILE_META_KEY) {
+        currentProfileMeta = normalizeProfileMeta(readStorage(PROFILE_META_KEY, currentProfileMeta), currentProfileMeta);
+        vibe.value = currentProfileMeta.vibe || '';
+        refreshProfilePicture();
+        window.setTimeout(maybePublishAvatarReaction, 500);
+      }
+    });
+
+    refreshProfilePicture();
+    return panel;
   }
 
   function getUnreadStates() {
@@ -296,6 +739,7 @@ document.addEventListener('DOMContentLoaded', () => {
       occurrences.set(fingerprint, occurrence + 1);
       group.dataset.messageId ||= `seed-${hash(`${conversation}\n${fingerprint}\n${occurrence}`)}`;
     });
+    initialGroups.forEach(upgradeMessageGroup);
 
     const storedMessages = readStorage(messageStorageKey(), []);
     if (!Array.isArray(storedMessages)) {
@@ -343,6 +787,7 @@ document.addEventListener('DOMContentLoaded', () => {
       messages.insertBefore(createMessageGroup(record), messages.querySelector('.typing-row'));
       existingIds.add(record.id);
     });
+    refreshMessageGrouping(messages);
 
     messages.scrollTop = messages.scrollHeight;
     updateHomeConversationPreviews();
@@ -369,22 +814,66 @@ document.addEventListener('DOMContentLoaded', () => {
         messages.insertBefore(createMessageGroup(record), messages.querySelector('.typing-row'));
         existingIds.add(record.id);
       });
+      refreshMessageGrouping(messages);
       updateHomeConversationPreviews();
+    });
+  }
+
+  function upgradeMessageGroup(article) {
+    if (article.querySelector(':scope > .message-content')) return;
+    const isUser = article.classList.contains('message-you');
+    const authorName = displayAuthor(article.querySelector('.message-author')?.textContent.trim() || '');
+    const author = isUser ? '' : authorName || 'Gold Squad';
+    article.dataset.author = isUser ? 'You' : author;
+    const authorLabel = article.querySelector('.message-author');
+    const bubble = article.querySelector('.message-bubble');
+    const receipt = article.querySelector('.message-receipt');
+    const reactions = [...article.querySelectorAll(':scope > .reaction-badge')];
+    const avatar = createSettingsElement('span', 'message-avatar');
+    avatar.setAttribute('aria-hidden', 'true');
+    decorateAvatar(avatar, author, isUser);
+    const content = createSettingsElement('div', 'message-content');
+    if (authorLabel) content.append(authorLabel);
+    if (bubble) content.append(bubble);
+    if (receipt) content.append(receipt);
+    article.replaceChildren(avatar, content, ...reactions);
+  }
+
+  function refreshMessageGrouping(messages) {
+    const groups = [...messages.querySelectorAll('.message-group')];
+    let previousAuthor = '';
+    groups.forEach((group) => {
+      const author = group.dataset.author ||
+        (group.classList.contains('message-you') ? 'You' : group.querySelector('.message-author')?.textContent.trim()) || '';
+      group.dataset.author = author;
+      group.classList.toggle('message-group--continuation', Boolean(author && author === previousAuthor));
+      previousAuthor = author;
     });
   }
 
   function createMessageGroup(record) {
     const article = document.createElement('article');
-    article.className = record.author
+    const authorName = record.author ? displayAuthor(record.author) : '';
+    article.className = authorName
       ? 'message-group'
       : 'message-group message-you';
     article.dataset.messageId = record.id;
+    article.dataset.author = authorName || 'You';
 
-    if (record.author) {
+    const avatar = document.createElement('span');
+    avatar.className = 'message-avatar';
+    avatar.setAttribute('aria-hidden', 'true');
+    decorateAvatar(avatar, authorName, !authorName);
+    article.append(avatar);
+
+    const content = document.createElement('div');
+    content.className = 'message-content';
+
+    if (authorName) {
       const author = document.createElement('h2');
       author.className = 'message-author';
-      author.textContent = displayAuthor(record.author);
-      article.append(author);
+      author.textContent = authorName;
+      content.append(author);
     }
 
     const bubble = document.createElement('div');
@@ -397,13 +886,14 @@ document.addEventListener('DOMContentLoaded', () => {
       time.dateTime = new Date(Number(record.timestamp)).toISOString();
     }
     bubble.append(text, time);
-    article.append(bubble);
+    content.append(bubble);
     if (!record.author && record.receipt) {
       const receipt = document.createElement('span');
       receipt.className = 'message-receipt';
       receipt.textContent = record.receipt;
-      article.append(receipt);
+      content.append(receipt);
     }
+    article.append(content);
     return article;
   }
 
@@ -416,7 +906,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!receipt) {
       receipt = document.createElement('span');
       receipt.className = 'message-receipt';
-      group.append(receipt);
+      group.querySelector('.message-content')?.append(receipt);
     }
     receipt.textContent = status;
 
@@ -429,6 +919,54 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function maybePublishAvatarReaction() {
+    if (!isChatPage || !conversation || !currentProfileMeta.revision ||
+        currentProfileMeta.acknowledgedRevision === currentProfileMeta.revision) return;
+    const lastReactionAt = Number(currentProfileMeta.lastReactionAt) || 0;
+    if (Date.now() - lastReactionAt < 30 * 60 * 1000) return;
+    const engine = window.MutantCommsConversationEngine;
+    if (!engine || typeof engine.avatarReaction !== 'function') {
+      console.error('MutantComms could not find the profile-picture reaction handler.');
+      return;
+    }
+    const participants = [...document.querySelectorAll('.info-panel li')]
+      .map((member) => member.textContent.trim())
+      .filter(Boolean);
+    const reply = engine.avatarReaction({
+      conversationId: conversation,
+      character: pageTitle,
+      participants,
+      vibe: currentProfileMeta.vibe,
+      spicyMode,
+      hasPicture: Boolean(currentProfileMeta.hasPicture)
+    });
+    currentProfileMeta = {
+      ...currentProfileMeta,
+      acknowledgedRevision: currentProfileMeta.revision,
+      lastReactionAt: reply ? Date.now() : lastReactionAt
+    };
+    if (!writeStorage(PROFILE_META_KEY, currentProfileMeta)) return;
+    if (!reply) return;
+    window.setTimeout(() => {
+      const messages = document.querySelector('.chat-messages');
+      const typing = messages?.querySelector('.typing-row');
+      if (!messages || !typing) return;
+      const timestamp = Date.now();
+      const record = {
+        id: `avatar-${window.crypto?.randomUUID?.() || `${timestamp.toString(36)}-${Math.random().toString(36).slice(2)}`}`,
+        author: reply.author,
+        text: reply.text,
+        time: formatTime(new Date(timestamp)),
+        timestamp
+      };
+      const article = createMessageGroup(record);
+      article.classList.add('message-enter');
+      messages.insertBefore(article, typing);
+      persistMessage(record);
+      messages.scrollTop = messages.scrollHeight;
+    }, 500);
+  }
+
   function persistMessage(record) {
     const history = readStorage(messageStorageKey(), []);
     if (!Array.isArray(history)) {
@@ -439,6 +977,7 @@ document.addEventListener('DOMContentLoaded', () => {
       history.push(record);
       writeStorage(messageStorageKey(), history);
     }
+    refreshMessageGrouping(document.querySelector('.chat-messages'));
     updateHomeConversationPreviews();
   }
 
@@ -564,6 +1103,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (response?.reaction && typeof window.mutantCommsAddCharacterReaction === 'function') {
           window.mutantCommsAddCharacterReaction(record.id, response.reaction);
         }
+        maybePublishAvatarReaction();
       } catch (error) {
         console.error('MutantComms local response handler failed.', error);
       } finally {
@@ -598,7 +1138,8 @@ document.addEventListener('DOMContentLoaded', () => {
             conversationId: conversation,
             character: pageTitle,
             text,
-            participants
+            participants,
+            spicyMode
           }));
         } catch (error) {
           console.error('MutantComms local response handler failed.', error);
@@ -957,6 +1498,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  createSettingsPanel();
+  decorateVisibleAvatars();
   initializeNetworkIndicator();
   initializeInfoPanel();
   initializeSearch();
@@ -969,5 +1512,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeMessageComposer(typing);
     initializeCustomKeyboard();
     initializeMessageReactions();
+    window.setTimeout(maybePublishAvatarReaction, 600);
   }
 });

@@ -81,7 +81,7 @@ window.MutantCommsConversationEngine = (() => {
   };
   const slang = {
     u: 'you', ur: 'your', r: 'are', im: 'i am', idk: 'i do not know',
-    omg: 'oh my god', lol: 'laughing', lmao: 'laughing', wtf: 'what the',
+    omg: 'oh my god', lol: 'laughing', lmao: 'laughing', wtf: 'what the fuck',
     pls: 'please', plz: 'please', rn: 'right now', bc: 'because', cuz: 'because',
     gonna: 'going to', wanna: 'want to', kinda: 'kind of', tbh: 'to be honest',
     tho: 'though', fr: 'for real', wyd: 'what are you doing'
@@ -150,6 +150,45 @@ window.MutantCommsConversationEngine = (() => {
   }
 
   function findIntent(text) {
+    const profanity = /\b(fuck(?:ing|ed|er|ers)?|shit(?:ty|ting)?|damn|hell|bitch(?:es)?|asshole|bastard|crap|bullshit)\b/.test(text);
+    const playfulCue = /\b(funny|lovable|loveable|kidding|joking|lol|lmao|haha|teasing)\b|😂|😅/i.test(text);
+    const insult = /\b(asshole|bastard|bitch|idiot|stupid|useless|pathetic|worthless|moron|jerk)\b/.test(text);
+    if (/\b(shut(?: the)? .* up|fuck off|go to hell|i hate you|i will (?:hurt|kill) you|you(?:'re| are) (?:a )?(?:fucking )?(?:asshole|bastard|bitch))\b/.test(text)) {
+      return 'profanity_aggressive';
+    }
+    if (insult && playfulCue) return 'playful_insult';
+    if (profanity && /\b(awesome|amazing|great|kind|cool|beautiful|handsome|wonderful|fantastic)\b/.test(text)) {
+      return 'compliment';
+    }
+    if (/\b(shut(?: the)? up|leave me alone|back off|stop talking)\b/.test(text)) return 'profanity_aggressive';
+    if (/\b(roast me|make fun of me|insult me|can you roast|give me your honest roast)\b/.test(text)) {
+      return 'roast_request';
+    }
+    if (/\b(jealous|jealousy|jealous of)\b/.test(text)) return 'jealousy';
+    if (/\b(crush|in love with anyone|in love with someone|do you like (?:jean|someone|anyone|any x[- ]?man))\b/.test(text)) {
+      return 'crush_question';
+    }
+    if (/\b(have you ever (?:kissed|dated)|your romantic history|your ex(?:es)?|past relationship|who have you loved|who did you love)\b/.test(text)) {
+      return 'romantic_history';
+    }
+    if (/\b(would you date me|date me|flirt|love you|marry me|kiss me|i have a crush on you)\b/.test(text)) {
+      return 'flirting';
+    }
+    if (/\b(attractive|good[- ]looking|handsome|beautiful|prett(?:y|ier)|who is hot|who's hot|who do you think is hot|most attractive)\b/.test(text)) {
+      return 'appearance_question';
+    }
+    if (/\b(are you dating|dating anyone|girlfriend|boyfriend|partner|in a relationship|relationship status|are you married|married to)\b/.test(text)) {
+      return 'dating_question';
+    }
+    if (profanity && insult) return 'profanity_aggressive';
+    if (profanity && /\b(annoying|frustrat|pissed|fed up|infuriat|sick of)\b/.test(text)) return 'profanity_casual';
+    if (profanity && !playfulCue) return 'profanity_casual';
+    if (/\b(awkward|embarrassing|personal question|have you kissed|would you tell me a secret)\b/.test(text)) {
+      return 'awkward_question';
+    }
+    if (/\b(unfiltered|brutally honest|spicy mode|no filter|dark humor|dark humour)\b/.test(text)) {
+      return 'spicy_banter';
+    }
     const direct = intentRules.find(([, pattern]) => pattern.test(text))?.[0];
     if (direct) return direct;
     const words = text.split(' ');
@@ -176,7 +215,8 @@ window.MutantCommsConversationEngine = (() => {
         responseIds: Array.isArray(value.responseIds) ? value.responseIds.slice(-8) : [],
         unusualStreak: Number(value.unusualStreak) || 0,
         branch: typeof value.branch === 'string' ? value.branch : '',
-        relationship: Number(value.relationship) || 0
+        relationship: Number(value.relationship) || 0,
+        personalQuestions: Number(value.personalQuestions) || 0
       };
     } catch (error) {
       console.error(`MutantComms could not read conversation memory for "${conversationId}".`, error);
@@ -197,7 +237,8 @@ window.MutantCommsConversationEngine = (() => {
       responseIds: [],
       unusualStreak: 0,
       branch: '',
-      relationship: 0
+      relationship: 0,
+      personalQuestions: 0
     };
   }
 
@@ -236,13 +277,14 @@ window.MutantCommsConversationEngine = (() => {
   function detectMood(text) {
     const value = String(text).toLocaleLowerCase();
     if (/\b(thank|grateful|happy|excited|great|love|yay)\b|[😊😄😁🎉]/u.test(value)) return 'positive';
-    if (/\b(sad|angry|upset|scared|worried|lonely|hate|bad day|rough day|hard day|overwhelmed|anxious)\b|[😢😭😟]/u.test(value)) return 'difficult';
+    if (/\b(sad|angry|upset|scared|worried|lonely|hate|bad day|rough day|hard day|overwhelmed|anxious|annoyed|annoying|frustrat|pissed|fed up|infuriat)\b|[😢😭😟]/u.test(value)) return 'difficult';
     if (/\b(joking|kidding|lol|laughing|absurd|ridiculous)\b|[😂😅]/u.test(value)) return 'playful';
     return 'neutral';
   }
 
-  function getIntentResponse(character, intent, memory) {
-    const library = dialogue.intents[intent]?.[character] || [];
+  function getIntentResponse(character, intent, memory, spicyMode = false) {
+    const library = dialogue.modeIntents[intent]?.[spicyMode ? 'spicy' : 'normal']?.[character] ||
+      dialogue.intents[intent]?.[character] || [];
     return library.length ? choose(library, memory, `${character}:${intent}`) : '';
   }
 
@@ -268,10 +310,24 @@ window.MutantCommsConversationEngine = (() => {
     ], memory, `${character}:fallback`);
   }
 
-  function makeReply(character, text, intent, memory, analysis) {
+  function makeReply(character, text, intent, memory, analysis, spicyMode) {
     let response = '';
     const resolvedIntent = intent || (analysis.topics.length ? 'lore' : '');
     const topic = analysis.topics[0];
+    const personalIntents = [
+      'crush_question', 'dating_question', 'romantic_history', 'flirting',
+      'jealousy', 'appearance_question', 'awkward_question'
+    ];
+    if ([
+      'crush_question', 'dating_question', 'romantic_history', 'flirting', 'jealousy'
+    ].includes(intent) && memory.personalQuestions >= 3) {
+      const unlocks = dialogue.personalUnlocks[character] || [];
+      if (unlocks.length) return choose(unlocks, memory, `${character}:personal-unlock`);
+    }
+    if (personalIntents.includes(intent) && memory.personalQuestions > 1) {
+      const followups = dialogue.personalFollowups[character] || [];
+      if (followups.length) return choose(followups, memory, `${character}:personal-followup`);
+    }
     if (analysis.unusual && memory.unusualStreak >= 3) {
       return getFallback(character, memory, analysis);
     }
@@ -279,13 +335,18 @@ window.MutantCommsConversationEngine = (() => {
       const topicLines = dialogue.topics[topic]?.responses[character] || [];
       if (topicLines.length) response = choose(topicLines, memory, `${character}:${topic}`);
     }
-    if (!response && resolvedIntent) response = getIntentResponse(character, resolvedIntent, memory);
-    if (!response && analysis.mood === 'difficult') response = getIntentResponse(character, 'support', memory);
+    if (!response && resolvedIntent) response = getIntentResponse(character, resolvedIntent, memory, spicyMode);
+    if (!response && analysis.mood === 'difficult') response = getIntentResponse(character, 'support', memory, spicyMode);
     if (!response) response = getFallback(character, memory, analysis);
 
     if (intent === 'question' && analysis.isFollowup && memory.currentTopic === 'cyclops' &&
         character === 'Wolverine') {
       response = "We've had our differences. Doesn't mean I don't respect the guy.";
+    }
+    if (intent === 'question' && analysis.isFollowup &&
+        memory.currentTopic === 'profanity_aggressive' && character === 'Wolverine' &&
+        /\bby who\b/.test(text)) {
+      response = "How much time you got?";
     }
     if (intent === 'relationship' && /\b(why|how come|what happened)\b/.test(text)) {
       const followup = {
@@ -303,7 +364,7 @@ window.MutantCommsConversationEngine = (() => {
     return response;
   }
 
-  function chooseGroupResponders(participants, entities, topic, memory, text) {
+  function chooseGroupResponders(participants, entities, topic, memory, text, intent) {
     const roster = [...new Set(participants.filter((name) => characters.includes(name)))];
     if (!roster.length) return [];
     const mentioned = entities.filter((name) => roster.includes(name));
@@ -324,6 +385,15 @@ window.MutantCommsConversationEngine = (() => {
       const second = roster.find((name) => name !== first &&
         (name === 'Storm' || name === 'Wolverine' || entities.includes(name)));
       if (second) replies.push(second);
+    } else if ([
+      'profanity_casual', 'profanity_aggressive', 'playful_insult', 'compliment',
+      'crush_question', 'dating_question', 'romantic_history', 'flirting', 'jealousy',
+      'appearance_question', 'awkward_question',
+      'roast_request', 'spicy_banter'
+    ].includes(intent) && Math.random() < 0.35) {
+      const second = roster.find((name) => name !== first && !memory.recentMessages.slice(-3)
+        .some((item) => item.author === name));
+      if (second) replies.push(second);
     } else if (Math.random() < 0.18) {
       const second = roster.find((name) => name !== first && !memory.recentMessages.slice(-3)
         .some((item) => item.author === name));
@@ -342,9 +412,16 @@ window.MutantCommsConversationEngine = (() => {
       intent = 'power';
     }
     const isFollowup = normalized.split(' ').length <= 5 &&
-      /^(why|how|what about him|what about her|then what|really|and then|would you|would he|would she|but why)\b/.test(normalized);
+      /^(why|how|what about him|what about her|then what|really|and then|would you|would he|would she|but why|come on tell me|tell me|and you|by who)\b/.test(normalized);
 
-    if (isFollowup && memory.currentTopic && !topics.length) topics.push(memory.currentTopic);
+    const personalIntents = [
+      'crush_question', 'dating_question', 'romantic_history', 'flirting',
+      'jealousy', 'appearance_question', 'awkward_question'
+    ];
+    if (isFollowup && !intent && personalIntents.includes(memory.currentTopic)) intent = memory.currentTopic;
+    if (isFollowup && memory.currentTopic && !topics.length && !personalIntents.includes(memory.currentTopic)) {
+      topics.push(memory.currentTopic);
+    }
     if (!intent && topics.length && /\?/.test(text)) intent = 'lore';
     if (!intent && /\?/.test(text) && /\b(what|who|where|when|why|how|can|could|would|do|does|is|are)\b/.test(normalized)) {
       intent = topics.length ? 'lore' : 'question';
@@ -361,13 +438,14 @@ window.MutantCommsConversationEngine = (() => {
       isFollowup,
       unusual,
       mood: detectMood(text),
+      hasProfanity: /\b(fuck(?:ing|ed|er|ers)?|shit(?:ty|ting)?|damn|hell|bitch(?:es)?|asshole|bastard|crap|bullshit)\b/.test(normalized),
       tone: /\b(joking|kidding|lol|lmao|haha|😂|😅)\b/.test(String(text).toLocaleLowerCase())
         ? 'joking'
         : /\b(i am serious|seriously|for real|not joking)\b/.test(normalized) ? 'serious' : 'unknown'
     };
   }
 
-  function respond({ conversationId, character, text, participants = [] }) {
+  function respond({ conversationId, character, text, participants = [], spicyMode = false }) {
     if (typeof conversationId !== 'string' || !conversationId ||
         typeof text !== 'string' || !text.trim()) {
       return { messages: [], analysis: null };
@@ -387,6 +465,10 @@ window.MutantCommsConversationEngine = (() => {
     memory.recognizedQuestions += text.includes('?') && (analysis.intent || analysis.topics.length) ? 1 : 0;
     memory.mood = analysis.mood;
     memory.tone = analysis.tone;
+    if ([
+      'crush_question', 'dating_question', 'romantic_history', 'flirting',
+      'jealousy', 'appearance_question', 'awkward_question'
+    ].includes(analysis.intent)) memory.personalQuestions += 1;
     if (['thanks', 'compliment', 'greeting'].includes(analysis.intent)) memory.relationship = Math.min(10, memory.relationship + 1);
     if (analysis.intent === 'insult') memory.relationship = Math.max(-10, memory.relationship - 1);
     memory.unusualStreak = analysis.unusual ? memory.unusualStreak + 1 : 0;
@@ -400,11 +482,11 @@ window.MutantCommsConversationEngine = (() => {
     });
 
     const responders = conversationId === 'gold-squad'
-      ? chooseGroupResponders(participants, analysis.entities, analysis.topics[0], memory, analysis.normalized)
+      ? chooseGroupResponders(participants, analysis.entities, analysis.topics[0], memory, analysis.normalized, analysis.intent)
       : [character].filter((name) => characters.includes(name));
     const messages = responders.map((name) => ({
       author: name,
-      text: makeReply(name, analysis.normalized, analysis.intent, memory, analysis)
+      text: makeReply(name, analysis.normalized, analysis.intent, memory, analysis, spicyMode)
     })).filter((reply) => reply.text);
     if (!messages.length && responders.length) {
       const fallbackCharacter = responders[0];
@@ -435,6 +517,39 @@ window.MutantCommsConversationEngine = (() => {
     return { messages, analysis, reaction };
   }
 
+  function avatarReaction({
+    conversationId,
+    character,
+    participants = [],
+    vibe = '',
+    spicyMode = false,
+    hasPicture = true
+  }) {
+    const roster = conversationId === 'gold-squad'
+      ? [...new Set(participants.filter((name) => characters.includes(name)))]
+      : [character].filter((name) => characters.includes(name));
+    if (!roster.length || Math.random() > 0.72) return null;
+    const memory = loadMemory(conversationId);
+    const responder = roster[Math.floor(Math.random() * roster.length)];
+    const normalizedVibe = hasPicture && ['Funny', 'Serious', 'Mysterious', 'Stylish', 'Chaotic'].includes(vibe)
+      ? vibe
+      : '';
+    const vibeLines = dialogue.vibeComments[normalizedVibe]?.[responder] || [];
+    const mode = spicyMode ? 'spicy' : 'normal';
+    let lines = dialogue.modeIntents[hasPicture ? 'avatar_changed' : 'avatar_removed'][mode][responder] || [];
+    if (normalizedVibe && vibeLines.length) {
+      const vibeComment = choose(vibeLines, memory, `${responder}:avatar-vibe:${normalizedVibe}`);
+      const roast = choose(dialogue.modeIntents.avatar_roast[mode][responder], memory, `${responder}:avatar-roast`);
+      lines = [`${vibeComment} ${roast}`];
+    }
+    if (!lines.length) return null;
+    const text = choose(lines, memory, `${responder}:avatar:${normalizedVibe || 'changed'}`);
+    memory.recentMessages.push({ text, author: responder, intent: 'avatar_changed', topics: [] });
+    memory.recentMessages = memory.recentMessages.slice(-20);
+    saveMemory(conversationId, memory);
+    return { author: responder, text };
+  }
+
   function inspect(conversationId) {
     return loadMemory(conversationId);
   }
@@ -447,5 +562,5 @@ window.MutantCommsConversationEngine = (() => {
     }
   }
 
-  return { respond, inspect, reset, analyze, findEntities, findTopics };
+  return { respond, inspect, reset, analyze, findEntities, findTopics, avatarReaction };
 })();

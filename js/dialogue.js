@@ -212,6 +212,276 @@ window.MutantCommsDialogue = {
       Cable: ["State the problem. I'll help you find a workable option.", "Understood. What do you need first?", "I'm listening. Give me the details."]
     }
   },
+  modeIntents: {
+    profanity_casual: {
+      normal: {
+        Wolverine: ["Easy, bub. What happened?", "That bad, huh? Want to tell me why?"],
+        Deadpool: ["Language! I mean, I use it too, but still.", "That word arrived with a tiny explosion."],
+        Storm: ["Something has clearly unsettled you. Would you like to speak of it?", "Let us take a breath. What happened?"],
+        Cable: ["Copy that. Identify the problem before it escalates.", "Understood. What triggered that reaction?"]
+      },
+      spicy: {
+        Wolverine: ["Yeah, that about sums it up. What went sideways?", "Hell of a day, huh? Give me the short version."],
+        Deadpool: ["A+ profanity. Needs more dramatic lighting.", "The swear jar just filed for bankruptcy."],
+        Storm: ["A forceful word. Now tell me what truly troubles you.", "Even the skies swear sometimes. What happened?"],
+        Cable: ["Noted. Now give me the unfiltered situation report.", "That was colorful. Get to the problem."]
+      }
+    },
+    profanity_aggressive: {
+      normal: {
+        Wolverine: ["I've been called worse. What are you actually mad about?", "Keep pushing and I'll end this conversation. What are you really mad about?"],
+        Deadpool: ["Whoa. I can take a hit, but let's aim for funny instead of cruel.", "That came in hot. Want to try saying what you mean?"],
+        Storm: ["I will not answer hostility with hostility. Tell me what is truly wrong.", "You may be angry, but we can still speak with care."],
+        Cable: ["Hostility noted. State the issue without the theatrics.", "Save the threat. Tell me what needs fixing."]
+      },
+      spicy: {
+        Wolverine: ["Yeah, been called worse. You done, or is there a point in there?", "Wanna keep swinging, bub? At least make it interesting."],
+        Deadpool: ["Bold choice. My feelings are made of plot armor and spite.", "I'll pretend to be offended if you promise to workshop that insult."],
+        Storm: ["You mistake restraint for permission. Choose your next words wisely.", "I command the weather; do not test how calm I can remain."],
+        Cable: ["That was your opening move? I've seen better reasoning from a malfunctioning drone.", "Try again when you have a point and a pulse."]
+      }
+    },
+    playful_insult: {
+      normal: {
+        Wolverine: ["Yeah, been called worse.", "Funny. Keep it up and I might start liking you."],
+        Deadpool: ["Insult received! I give it four stars and a tiny trophy.", "Aww, banter. My favorite legally questionable love language."],
+        Storm: ["I shall take that in the playful spirit I hope you intended.", "A bold tease. I will allow it this once."],
+        Cable: ["Was that meant to be funny? I'm choosing to assume yes.", "Acknowledged. Banter logged; morale remains acceptable."]
+      },
+      spicy: {
+        Wolverine: ["Yeah, been called worse. By people with better timing.", "Careful, bub. I might start charging for this kind of attention."],
+        Deadpool: ["You call me a bastard; I call it a family reunion.", "Finally, someone insulting me with affection. Continue."],
+        Storm: ["A sharp tongue is no substitute for wit, but you made a fair attempt.", "I admire your confidence. Your aim could use work."],
+        Cable: ["Cute. I've heard sharper insults from a training manual.", "If that's a roast, the mission is still safe."]
+      }
+    },
+    compliment: {
+      normal: {
+        Wolverine: ["Thanks. Don't get used to me saying that.", "Appreciate it. You're not so bad yourself."],
+        Deadpool: ["Compliment received! Adding it to my press kit.", "Finally, a review from someone with excellent taste."],
+        Storm: ["Thank you. That is very kind.", "I appreciate you saying that."],
+        Cable: ["Thanks. Focus on the mission.", "Acknowledged. I appreciate it."]
+      },
+      spicy: {
+        Wolverine: ["Damn right. Nice to hear you noticed.", "Flattery might get you somewhere. Don't make it weird."],
+        Deadpool: ["You think I'm awesome? Excellent taste and excellent judgment.", "Keep talking like that and I might start believing my own hype."],
+        Storm: ["You are generous with your praise. I may grow accustomed to it.", "A lovely compliment. Do not expect me to blush on command."],
+        Cable: ["Compliment logged. Don't expect a tactical advantage.", "Thanks. Your judgment is less questionable than usual."]
+      }
+    },
+    crush_question: {
+      normal: {
+        Wolverine: ["What is this, high school? Ask me something useful.", "You really don't know when to quit, do ya?"],
+        Deadpool: ["I have a crush on snacks, dramatic timing, and plausible deniability.", "Vanessa had a way of seeing the person under all the noise."],
+        Storm: ["Affection is deeply personal. I will share it when I choose.", "You are rather curious about my heart, are you not?"],
+        Cable: ["That is not mission-critical information.", "Personal questions are not part of the briefing."]
+      },
+      spicy: {
+        Wolverine: ["What is this, high school? You got a crush on gossip, bub?", "You really don't know when to quit. Jean's name stays out of this."],
+        Deadpool: ["Vanessa. Also the person reading this. Don't make it weird. Too late.", "My type? Someone who can survive the third act and my playlist."],
+        Storm: ["I have loved with my whole heart. That answer is all you are owed today.", "If I tell you, will you stop interrogating me like a tabloid?"],
+        Cable: ["My personal life is classified. So is the reason you're asking.", "Domino knew better than to file that question as intel."]
+      }
+    },
+    dating_question: {
+      normal: {
+        Wolverine: ["It's complicated. Most things worth having are.", "You ask a lot of questions for someone who wants a simple answer."],
+        Deadpool: ["My dating history needs a flowchart and a patient editor.", "Vanessa matters to me. The rest is a long, weird footnote."],
+        Storm: ["I have loved deeply, and I remain open to what life brings.", "My heart is my own. I share it by choice, not on demand."],
+        Cable: ["My history is complicated. That's all you need for now.", "I'd rather keep my private life out of the operation."]
+      },
+      spicy: {
+        Wolverine: ["You planning to apply, or just collecting data?", "Had my share of heartbreak. Not putting it in a report for you."],
+        Deadpool: ["It's complicated. There are charts, timelines, and one very patient Vanessa.", "Are you asking for a friend, or should I start blushing under the mask?"],
+        Storm: ["I have known passion and loss. I will not reduce either to gossip.", "The answer depends on the person asking—and how charming they are."],
+        Cable: ["I'm not dating the mission. Focus.", "My romantic history is not declassified. Try another question."]
+      }
+    },
+    romantic_history: {
+      normal: {
+        Wolverine: ["I've loved and lost. That's enough of the story for now.", "Mariko deserved better than the life I could offer her."],
+        Deadpool: ["Vanessa saw more in me than I thought was there.", "I've made a mess of romance. Occasionally, I even learned something."],
+        Storm: ["Love has shaped me, but it has never defined all of me.", "Some chapters end with gratitude, even when they hurt."],
+        Cable: ["Aliya and I shared a life in a time that no longer exists.", "Some parts of the past deserve more than a chat reply."]
+      },
+      spicy: {
+        Wolverine: ["Mariko, Jean... long stories. Don't turn them into a scoreboard.", "I loved hard, lost hard, and learned not to hand strangers the details."],
+        Deadpool: ["Vanessa knew the real me. That's either romance or a medical miracle.", "I've kissed a lot of people. The continuity department is still counting."],
+        Storm: ["Forge and T'Challa are chapters, not gossip for your group chat.", "I have loved fiercely. That is not an invitation to cross-examine me."],
+        Cable: ["Aliya was my family. Domino was... complicated. That's the briefing.", "I've lost enough years to stop romanticizing the past."]
+      }
+    },
+    flirting: {
+      normal: {
+        Wolverine: ["Easy there. You don't know what you're getting into.", "That's bold. I'll give you that."],
+        Deadpool: ["Flirting in the chat? At last, my genre.", "I blush under the mask. Probably. Let's call it a yes."],
+        Storm: ["You are charming. I will give you that.", "A kind compliment, though I prefer to know someone first."],
+        Cable: ["Is this relevant to the mission?", "You're distracting me. That may have been the point."]
+      },
+      spicy: {
+        Wolverine: ["You got a death wish asking me that, bub?", "Keep talking like that and I'll start thinking you mean it."],
+        Deadpool: ["Wow. Straight to flirting? At least buy me dinner first.", "Careful, gorgeous. My charm comes with a questionable warranty."],
+        Storm: ["You are bold. I do admire confidence when it is well placed.", "That was smooth. I may let you try that line again."],
+        Cable: ["That was not in the mission briefing. Continue.", "I don't have a protocol for this—and that's inconvenient."]
+      }
+    },
+    jealousy: {
+      normal: {
+        Wolverine: ["You looking to start trouble?", "Scott and I have our history. Leave it at that."],
+        Deadpool: ["Jealousy: the world's least fun team-building exercise.", "I prefer trust. And maybe an aggressively supportive playlist."],
+        Storm: ["Jealousy asks us to examine what we fear losing.", "I would rather speak honestly than let suspicion take root."],
+        Cable: ["Jealousy is not evidence. Ask the person involved.", "I don't waste time competing over someone else's choices."]
+      },
+      spicy: {
+        Wolverine: ["You got a death wish asking me that, bub?", "Scott? Jealous? Keep digging and see what you find."],
+        Deadpool: ["Jealous? No. Petty, competitive, and wearing excellent imaginary sunglasses.", "If I were jealous, there'd be a playlist and a subplot."],
+        Storm: ["I command the weather, yet somehow your judgment is today's natural disaster.", "Do not mistake my history for an invitation to stir trouble."],
+        Cable: ["Jealousy is an inefficient use of ammunition.", "Scott and I have history. You don't need to turn it into a contest."]
+      }
+    },
+    appearance_question: {
+      normal: {
+        Wolverine: ["You asking if you're attractive? Confidence helps more than a mirror.", "Looks aren't the part people remember."],
+        Deadpool: ["Confidence! I like it. I'm giving the question a solid 8.5.", "Attractiveness is subjective; chimichanga loyalty is not."],
+        Storm: ["Beauty is not a measure of your worth, though confidence can be lovely.", "You need not ask another person to decide whether you are enough."],
+        Cable: ["That's subjective. Confidence and character matter more.", "I don't run attractiveness assessments."]
+      },
+      spicy: {
+        Wolverine: ["You want my opinion? You got enough confidence to ask. Start there.", "You clean up fine, bub. Don't make me repeat it."],
+        Deadpool: ["Wow. Straight to flirting? Buy me dinner before questionable decisions.", "You have main-character confidence. Let's see if the dialogue holds up."],
+        Storm: ["You are asking the wrong person to measure your worth. But you carry yourself well.", "Attractive? Perhaps. Your confidence is doing most of the work."],
+        Cable: ["You're fishing for a compliment. Fine: you look confident.", "I assess threats, not cheekbones. You're welcome."]
+      }
+    },
+    roast_request: {
+      normal: {
+        Wolverine: ["You seem to be doing fine on your own.", "All right, but don't start whining when I do."],
+        Deadpool: ["Your search history called. It wants a more interesting protagonist.", "I'd roast you, but the fourth wall says you're already well done."],
+        Storm: ["I believe you are doing quite well on your own.", "I could, but kindness is a more interesting challenge."],
+        Cable: ["Your planning could use a second draft. That's the roast.", "You asked a soldier for subtlety. Mistake."]
+      },
+      spicy: {
+        Wolverine: ["I've seen sharper instincts on a butter knife. You want another?", "You walk into trouble like it's handing out free snacks."],
+        Deadpool: ["Your Wi-Fi has more commitment than your last three plans.", "You're the plot twist the editors tried to cut."],
+        Storm: ["I command the weather, yet your judgment remains today's greatest natural disaster.", "Your confidence is impressive. Your decisions are less so."],
+        Cable: ["I've seen better tactical judgment from a malfunctioning toaster.", "Your plan has more holes than a temporal battlefield."]
+      }
+    },
+    awkward_question: {
+      normal: {
+        Wolverine: ["That's personal. You always this nosy?", "I'm not answering that one. Ask me something else."],
+        Deadpool: ["That question needs a warning label and maybe a tiny hat.", "I'm choosing to answer the version you meant to ask."],
+        Storm: ["That is a rather personal question. Let us respect one another's boundaries.", "Curiosity is natural; an answer is still mine to give."],
+        Cable: ["Not mission-relevant. Move on.", "Classified. And no, you don't have clearance."]
+      },
+      spicy: {
+        Wolverine: ["How much time you got? For the answer or the consequences?", "You really don't know when to quit, do ya?"],
+        Deadpool: ["That question just made three writers uncomfortable. Bravo.", "I could answer, but then the chat would need a content warning."],
+        Storm: ["Your curiosity is relentless. My boundaries are more so.", "Ask again and I may assign you to storm cleanup."],
+        Cable: ["That's above your clearance and below my patience.", "I've dodged time paradoxes with less persistence."]
+      }
+    },
+    avatar_changed: {
+      normal: {
+        Wolverine: ["New picture, huh?", "You always changing that thing?"],
+        Deadpool: ["NEW PROFILE PIC ALERT.", "Oh, we're doing a rebrand?"],
+        Storm: ["I see you've updated your picture.", "A fresh look. Very nice."],
+        Cable: ["Profile updated. Great.", "Is this relevant to the mission?"]
+      },
+      spicy: {
+        Wolverine: ["New picture, huh? Trying to look less suspicious?", "You always changing that thing, bub?"],
+        Deadpool: ["NEW PROFILE PIC ALERT. The press tour begins now.", "Rebrand detected. No notes. Several notes."],
+        Storm: ["A fresh look. I trust you chose it for yourself.", "Your profile has changed; your confidence appears intact."],
+        Cable: ["Profile updated. I assume this was mission-critical.", "New image logged. Moving on."]
+      }
+    },
+    avatar_removed: {
+      normal: {
+        Wolverine: ["Reset your picture, huh?", "Back to the default. Works for me."],
+        Deadpool: ["The profile pic has entered witness protection.", "Default avatar era! A bold minimalist choice."],
+        Storm: ["You have returned to your default picture. A choice of your own.", "A simpler profile. There is no need to explain."],
+        Cable: ["Avatar reset. A clean baseline.", "Profile image removed. Acknowledged."]
+      },
+      spicy: {
+        Wolverine: ["Reset your picture, huh? Keeping a low profile?", "Default avatar. Can't blame you for going undercover."],
+        Deadpool: ["The profile pic has entered witness protection. I respect the drama.", "Minimalist rebrand. The committee has questions."],
+        Storm: ["You have chosen a quieter profile. Let it be yours.", "A deliberate reset. No explanation required."],
+        Cable: ["Avatar reset. Fewer variables.", "Profile image removed. Mission status unchanged."]
+      }
+    },
+    avatar_roast: {
+      normal: {
+        Wolverine: ["Not bad. I've seen worse.", "I'll give it a pass. Don't let it go to your head."],
+        Deadpool: ["I'm giving this a solid 8.5. Don't ask about the scoring system.", "I respect the vibe. The algorithm—me—has spoken."],
+        Storm: ["A fresh look. Very nice.", "You seem pleased with your new picture."],
+        Cable: ["Profile updated. Great.", "At least the vibe selection was decisive."]
+      },
+      spicy: {
+        Wolverine: ["Not bad. I've seen worse mugshots.", "That's the vibe you picked? Bold. I'll allow it."],
+        Deadpool: ["Solid 8.5. Two bonus points for commitment to the bit.", "I'm not analyzing the photo; I'm roasting your vibe selection."],
+        Storm: ["A confident choice. I shall refrain from judging the pixels.", "Your chosen vibe is bold. Own it."],
+        Cable: ["Vibe logged. I still don't see its tactical value.", "You selected that category yourself. No appeals."]
+      }
+    },
+    spicy_banter: {
+      normal: {
+        Wolverine: ["You want the honest version or the polite one?", "Careful. Wade's been teaching the team bad habits."],
+        Deadpool: ["Unfiltered? You have come to the right questionable source.", "I can make this weirder, but I respect your right to opt out."],
+        Storm: ["Honesty need not be unkind. Let us keep it that way.", "I can be candid without losing my composure."],
+        Cable: ["Define unfiltered. I still have operational limits.", "I can be direct. Don't confuse that with careless."]
+      },
+      spicy: {
+        Wolverine: ["All right, bub. No padding, no apologies. What is it?", "You asked for unfiltered. Don't complain when it stings."],
+        Deadpool: ["Unfiltered mode: activated. Legal department: unavailable.", "Let's make this chaotic, not cruel. I contain multitudes."],
+        Storm: ["I will be candid, not careless. There is a difference.", "Very well. I shall spare your feelings only when they deserve it."],
+        Cable: ["Fine. No euphemisms, no unnecessary optimism.", "Direct answer incoming. Brace for impact."]
+      }
+    }
+  },
+  personalFollowups: {
+    Wolverine: ["You really don't know when to quit, do ya?", "That's enough questions about my personal life, bub."],
+    Deadpool: ["You are committed to this subplot. I respect the hustle.", "Two follow-ups? Fine, but the next one costs a chimichanga."],
+    Storm: ["I have answered what I can. Let us leave the rest to trust.", "Your curiosity is noted; my answer remains my own."],
+    Cable: ["Persistent. Still classified.", "You have your answer. Change the subject."]
+  },
+  personalUnlocks: {
+    Wolverine: ["All right. Jean and Mariko mattered to me. I won't pretend that history was simple.", "I loved hard, lost hard. That's the honest version, and that's all you're getting."],
+    Deadpool: ["Vanessa saw who I was when I couldn't. That's the part I don't joke about.", "For once, no punchline: being loved when I felt unlovable changed me."],
+    Storm: ["Forge and T'Challa were important chapters. I learned love must leave room for freedom.", "I have loved deeply, and I learned that devotion should never ask me to become smaller."],
+    Cable: ["Aliya was Hope's mother and my wife. Domino and I shared a different kind of trust.", "I have loved people across impossible timelines. That is enough history for one conversation."]
+  },
+  vibeComments: {
+    Funny: {
+      Wolverine: ["Funny vibe, huh? Don't expect me to laugh on command.", "You picked Funny. Wade's going to think you mean him."],
+      Deadpool: ["You picked Funny. The pressure is now legally mine.", "Funny vibe? Finally, someone has a sense of branding."],
+      Storm: ["You chose a playful spirit. I hope it brings you joy.", "Funny is a fine choice, especially when shared kindly."],
+      Cable: ["Funny vibe selected. I will update the mission risk assessment.", "Humor can help morale. Keep it operational."]
+    },
+    Serious: {
+      Wolverine: ["Serious vibe. At least one of us is trying.", "You picked Serious. I'll try not to ruin the moment."],
+      Deadpool: ["Serious vibe? I promise to be normal for at least three seconds.", "You chose Serious. I will respect the tone. Mostly."],
+      Storm: ["A thoughtful choice. Let us meet the moment with care.", "You chose a composed look. I respect the intention."],
+      Cable: ["Serious. Good. We have enough distractions.", "A focused choice. Approved."]
+    },
+    Mysterious: {
+      Wolverine: ["Mysterious, huh? Long as you don't start speaking in riddles.", "You picked Mysterious. I've met worse secrets."],
+      Deadpool: ["Mysterious vibe unlocked. Cue the suspicious fog machine.", "You chose Mysterious. I have questions and a tiny flashlight."],
+      Storm: ["A little mystery can be compelling. Keep some things for yourself.", "You chose an air of mystery. A wise boundary."],
+      Cable: ["Mysterious. That is not a useful mission descriptor.", "Noted. I'll keep an eye on the unknown variable."]
+    },
+    Stylish: {
+      Wolverine: ["Stylish? Don't let it go to your head, bub.", "You picked Stylish. Better than my usual wardrobe report."],
+      Deadpool: ["Stylish! I knew this chat had a costume department.", "You chose Stylish. I am jealous of the implied wardrobe budget."],
+      Storm: ["Style can be a way of expressing confidence. Wear it well.", "A stylish choice. Elegance is its own kind of strength."],
+      Cable: ["Stylish. Not tactical, but noted.", "Style selected. I'll leave the fashion briefing to you."]
+    },
+    Chaotic: {
+      Wolverine: ["Chaotic? Yeah, I could've guessed. Keep me out of it.", "You picked Chaotic. Wade is going to be unbearable."],
+      Deadpool: ["Chaotic! Finally, an official endorsement of my entire brand.", "You chose Chaotic. I have prepared seventeen sound effects."],
+      Storm: ["A lively choice. Let us keep the chaos harmless.", "Chaotic energy can be fun when guided with care."],
+      Cable: ["Chaotic is not a plan. It is a warning.", "I have survived worse variables. Probably."]
+    }
+  },
   topics: {
     xavier: {
       aliases: ["professor x", "professor xavier", "charles xavier", "xavier", "the professor"],

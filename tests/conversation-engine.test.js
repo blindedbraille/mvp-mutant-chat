@@ -287,6 +287,184 @@ report('Repeated unusual questions are remembered for callbacks',
   engine.inspect(unusualId).unusualStreak === 4);
 report('Dialogue data declares its comic continuity',
   window.MutantCommsDialogue.continuity.includes('Earth-616'));
+const expectedIntentCategories = [
+  'profanity_casual', 'profanity_aggressive', 'playful_insult', 'compliment',
+  'crush_question', 'dating_question', 'romantic_history', 'flirting', 'jealousy',
+  'appearance_question', 'avatar_changed', 'avatar_roast', 'roast_request',
+  'awkward_question', 'spicy_banter'
+];
+report('Every new dialogue category has multiple normal and spicy replies per character',
+  expectedIntentCategories.every((intent) =>
+    ['normal', 'spicy'].every((mode) =>
+      ['Wolverine', 'Deadpool', 'Storm', 'Cable'].every((character) =>
+        window.MutantCommsDialogue.modeIntents[intent]?.[mode]?.[character]?.length >= 2))));
+
+const profanityCases = [
+  ['What the fuck?', 'profanity_casual'],
+  ["This is fucking annoying.", 'profanity_casual'],
+  ['Shut the fuck up.', 'profanity_aggressive'],
+  ["You're a funny bastard.", 'playful_insult'],
+  ["You're fucking awesome.", 'compliment']
+];
+profanityCases.forEach(([text, expected]) => {
+  report(`Profanity context: ${JSON.stringify(text)}`,
+    engine.analyze(text, engine.inspect('suite-profanity')).intent === expected);
+});
+report('Profanity recognition does not erase frustration tone',
+  engine.analyze('This is fucking annoying.', engine.inspect('suite-profanity')).mood === 'difficult');
+
+const romanceCases = [
+  ["Who's your crush?", 'crush_question'],
+  ['Do you like Jean?', 'crush_question'],
+  ['Are you dating anyone?', 'dating_question'],
+  ['Have you ever kissed someone?', 'romantic_history'],
+  ['Would you date me?', 'flirting'],
+  ['Are you jealous of Scott?', 'jealousy'],
+  ["Who's the most attractive X-Man?", 'appearance_question']
+];
+romanceCases.forEach(([text, expected]) => {
+  report(`Romance recognition: ${JSON.stringify(text)}`,
+    engine.analyze(text, engine.inspect('suite-romance')).intent === expected);
+});
+[
+  ['Can you roast me?', 'roast_request'],
+  ['That is an awkward question.', 'awkward_question'],
+  ['Be brutally honest with me.', 'spicy_banter']
+].forEach(([text, expected]) => {
+  report(`Personal banter recognition: ${JSON.stringify(text)}`,
+    engine.analyze(text, engine.inspect('suite-banter')).intent === expected);
+});
+
+const originalRandomForMode = Math.random;
+let normalFlirt;
+let spicyFlirt;
+try {
+  Math.random = () => 0;
+  engine.reset('suite-normal-flirt');
+  normalFlirt = engine.respond({
+    conversationId: 'suite-normal-flirt',
+    character: 'Storm',
+    text: 'Would you date me?'
+  }).messages[0]?.text;
+  engine.reset('suite-spicy-flirt');
+  spicyFlirt = engine.respond({
+    conversationId: 'suite-spicy-flirt',
+    character: 'Storm',
+    text: 'Would you date me?',
+    spicyMode: true
+  }).messages[0]?.text;
+} finally {
+  Math.random = originalRandomForMode;
+}
+report('Spicy Mode selects a distinct character-appropriate flirt response',
+  Boolean(normalFlirt && spicyFlirt && normalFlirt !== spicyFlirt));
+
+const romanceFollowupId = 'suite-romance-followup';
+engine.reset(romanceFollowupId);
+engine.respond({ conversationId: romanceFollowupId, character: 'Wolverine', text: "Who's your crush?" });
+const romanceFollowup = engine.respond({
+  conversationId: romanceFollowupId,
+  character: 'Wolverine',
+  text: 'Come on, tell me.'
+});
+report('Persistent romantic questions unlock a character-specific follow-up',
+  romanceFollowup.analysis.intent === 'crush_question' &&
+  /quit|enough questions/i.test(romanceFollowup.messages[0]?.text || '') &&
+  engine.inspect(romanceFollowupId).personalQuestions >= 2);
+const romanceUnlock = engine.respond({
+  conversationId: romanceFollowupId,
+  character: 'Wolverine',
+  text: 'Really?'
+});
+report('Further personal questions unlock a more candid relationship branch',
+  romanceUnlock.analysis.intent === 'crush_question' &&
+  /jean|mariko|loved hard/i.test(romanceUnlock.messages[0]?.text || ''));
+
+const profanityFollowupId = 'suite-profane-followup';
+engine.reset(profanityFollowupId);
+engine.respond({
+  conversationId: profanityFollowupId,
+  character: 'Wolverine',
+  text: "Logan, you're a fucking asshole."
+});
+const profanityFollowup = engine.respond({
+  conversationId: profanityFollowupId,
+  character: 'Wolverine',
+  text: 'By who?'
+});
+report('Profanity banter remembers and answers its short follow-up',
+  profanityFollowup.analysis.isFollowup &&
+  profanityFollowup.messages[0]?.text === 'How much time you got?');
+
+const groupReactionId = 'gold-squad';
+engine.reset(groupReactionId);
+const originalRandomForGroup = Math.random;
+let groupBanter;
+try {
+  Math.random = () => 0;
+  groupBanter = engine.respond({
+    conversationId: groupReactionId,
+    character: 'Gold Squad',
+    participants: ['Wolverine', 'Storm', 'Deadpool'],
+    text: "Who's your crush?"
+  });
+} finally {
+  Math.random = originalRandomForGroup;
+}
+report('Group romance prompts can invite multiple roster-only reactions',
+  groupBanter.messages.length > 1 &&
+  groupBanter.messages.every((message) => ['Wolverine', 'Storm', 'Deadpool'].includes(message.author)));
+
+const originalRandomForInsult = Math.random;
+let groupInsult;
+try {
+  Math.random = () => 0;
+  engine.reset('gold-squad');
+  groupInsult = engine.respond({
+    conversationId: 'gold-squad',
+    character: 'Gold Squad',
+    participants: ['Wolverine', 'Storm'],
+    text: "You're a funny bastard."
+  });
+} finally {
+  Math.random = originalRandomForInsult;
+}
+report('Group profanity banter stays in character and inside the roster',
+  groupInsult.analysis.intent === 'playful_insult' &&
+  groupInsult.messages.length > 1 &&
+  groupInsult.messages.every((message) => ['Wolverine', 'Storm'].includes(message.author)));
+
+const originalRandomForAvatar = Math.random;
+let avatarComment;
+try {
+  Math.random = () => 0;
+  avatarComment = engine.avatarReaction({
+    conversationId: 'suite-avatar-comment',
+    character: 'Storm',
+    vibe: 'Mysterious',
+    hasPicture: true
+  });
+} finally {
+  Math.random = originalRandomForAvatar;
+}
+report('Avatar reactions use the selected vibe without claiming image recognition',
+  avatarComment?.author === 'Storm' &&
+  /mystery|mysterious/i.test(avatarComment.text) &&
+  !/you look|i can see|in the picture/i.test(avatarComment.text));
+
+let avatarResetComment;
+try {
+  Math.random = () => 0;
+  avatarResetComment = engine.avatarReaction({
+    conversationId: 'suite-avatar-reset',
+    character: 'Cable',
+    hasPicture: false
+  });
+} finally {
+  Math.random = originalRandomForAvatar;
+}
+report('Removing an avatar produces a distinct scripted reset reaction',
+  avatarResetComment?.author === 'Cable' && /reset|removed|default/i.test(avatarResetComment.text));
 
 summary.textContent = `${passed} passed, ${failed} failed.`;
 summary.style.color = failed ? '#b00020' : '#08752d';
