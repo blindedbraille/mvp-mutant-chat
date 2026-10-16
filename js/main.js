@@ -398,7 +398,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     bubble.append(text, time);
     article.append(bubble);
+    if (!record.author && record.receipt) {
+      const receipt = document.createElement('span');
+      receipt.className = 'message-receipt';
+      receipt.textContent = record.receipt;
+      article.append(receipt);
+    }
     return article;
+  }
+
+  function updateMessageReceipt(messageId, status) {
+    const group = [...document.querySelectorAll('.message-group')]
+      .find((message) => message.dataset.messageId === messageId);
+    if (!group || group.classList.contains('message-you') === false) return;
+
+    let receipt = group.querySelector('.message-receipt');
+    if (!receipt) {
+      receipt = document.createElement('span');
+      receipt.className = 'message-receipt';
+      group.append(receipt);
+    }
+    receipt.textContent = status;
+
+    const history = readStorage(messageStorageKey(), []);
+    if (!Array.isArray(history)) return;
+    const record = history.find((message) => message?.id === messageId);
+    if (record) {
+      record.receipt = status;
+      writeStorage(messageStorageKey(), history);
+    }
   }
 
   function persistMessage(record) {
@@ -490,7 +518,8 @@ document.addEventListener('DOMContentLoaded', () => {
         id: `user-${window.crypto?.randomUUID?.() || `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`}`,
         text,
         time: formatTime(new Date(timestamp)),
-        timestamp
+        timestamp,
+        receipt: 'Delivered'
       };
       const article = createMessageGroup(record);
       article.classList.add('message-enter');
@@ -507,21 +536,33 @@ document.addEventListener('DOMContentLoaded', () => {
       setTypingVisible(typing, true);
       try {
         const response = await requestCharacterResponse(text);
-        const responseText = typeof response === 'string' ? response : response?.text;
-        if (typeof responseText === 'string' && responseText.trim()) {
+        const replies = Array.isArray(response?.messages)
+          ? response.messages
+          : typeof response === 'string'
+            ? [{ text: response }]
+            : typeof response?.text === 'string' ? [response] : [];
+        for (let index = 0; index < replies.length; index += 1) {
+          const reply = replies[index];
+          const responseText = typeof reply?.text === 'string' ? reply.text.trim() : '';
+          if (!responseText) continue;
+          if (index > 0) await waitFor(450 + Math.random() * 850);
           const receivedAt = Date.now();
           const receivedRecord = {
             id: `received-${window.crypto?.randomUUID?.() || `${receivedAt.toString(36)}-${Math.random().toString(36).slice(2)}`}`,
-            author: typeof response?.author === 'string' && response.author.trim()
-              ? displayAuthor(response.author.trim())
+            author: typeof reply.author === 'string' && reply.author.trim()
+              ? displayAuthor(reply.author.trim())
               : conversation === 'gold-squad' ? 'Gold Squad' : pageTitle,
-            text: responseText.trim(),
+            text: responseText,
             time: formatTime(new Date(receivedAt)),
             timestamp: receivedAt
           };
           messages.insertBefore(createMessageGroup(receivedRecord), typing);
           persistMessage(receivedRecord);
           if (nearBottom) messages.scrollTop = messages.scrollHeight;
+        }
+        if (replies.length) updateMessageReceipt(record.id, 'Seen');
+        if (response?.reaction && typeof window.mutantCommsAddCharacterReaction === 'function') {
+          window.mutantCommsAddCharacterReaction(record.id, response.reaction);
         }
       } catch (error) {
         console.error('MutantComms local response handler failed.', error);
@@ -540,13 +581,35 @@ document.addEventListener('DOMContentLoaded', () => {
       window.setTimeout(() => {
         try {
           const handler = window.mutantCommsResponseHandler;
-          resolve(typeof handler === 'function' ? handler(text) : null);
+          if (typeof handler === 'function') {
+            resolve(handler(text));
+            return;
+          }
+          const engine = window.MutantCommsConversationEngine;
+          if (!engine) {
+            console.error('MutantComms could not find its local conversation engine.');
+            resolve(null);
+            return;
+          }
+          const participants = [...document.querySelectorAll('.info-panel li')]
+            .map((member) => member.textContent.trim())
+            .filter(Boolean);
+          resolve(engine.respond({
+            conversationId: conversation,
+            character: pageTitle,
+            text,
+            participants
+          }));
         } catch (error) {
           console.error('MutantComms local response handler failed.', error);
           resolve(null);
         }
-      }, 700);
+      }, 400 + Math.random() * 700);
     });
+  }
+
+  function waitFor(milliseconds) {
+    return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
   }
 
   function initializeCustomKeyboard() {
@@ -772,10 +835,6 @@ document.addEventListener('DOMContentLoaded', () => {
         Object.entries(state.counts).filter(([emoji, count]) =>
           REACTIONS.includes(emoji) && Number.isFinite(Number(count)) && Number(count) > 0)
       );
-      const previousAiReaction = REACTIONS.includes(state.aiReaction) ? state.aiReaction : '';
-      if (previousAiReaction) {
-        counts[previousAiReaction] = Math.max(0, (Number(counts[previousAiReaction]) || 0) - 1);
-      }
       const userReaction = REACTIONS.includes(state.userReaction) ? state.userReaction : '';
       if (Object.keys(counts).length === 0 && !userReaction) {
         delete storedReactions[id];
@@ -786,6 +845,21 @@ document.addEventListener('DOMContentLoaded', () => {
       if (group) renderReactionBadges(group, counts, userReaction);
     });
     writeStorage(reactionStorageKey(), storedReactions);
+
+    window.mutantCommsAddCharacterReaction = (messageId, emoji) => {
+      if (!REACTIONS.includes(emoji)) return;
+      const group = [...messages.querySelectorAll('.message-group')]
+        .find((message) => message.dataset.messageId === messageId);
+      if (!group) return;
+      const state = storedReactions[messageId] || {
+        counts: getReactionCounts(group),
+        userReaction: ''
+      };
+      state.counts[emoji] = (Number(state.counts[emoji]) || 0) + 1;
+      storedReactions[messageId] = state;
+      writeStorage(reactionStorageKey(), storedReactions);
+      renderReactionBadges(group, state.counts, state.userReaction);
+    };
 
     const closeMenu = () => {
       menu.classList.remove('reaction-menu-visible');

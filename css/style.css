@@ -628,6 +628,13 @@ input {
   color: rgba(255,255,255,0.72);
 }
 
+.message-receipt {
+  margin: -5px 10px 0;
+  color: var(--muted);
+  font-size: 0.48rem;
+  letter-spacing: 0.02em;
+}
+
 .reaction-badge {
   display: inline-flex;
   align-self: flex-start;
