@@ -51,8 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
     return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
   }
 
-  function messageStorageKey() {
-    return `${STORAGE_PREFIX}messages:${conversation}`;
+  function messageStorageKey(name = conversation) {
+    return `${STORAGE_PREFIX}messages:${name}`;
   }
 
   function reactionStorageKey() {
@@ -68,6 +68,64 @@ document.addEventListener('DOMContentLoaded', () => {
     if (explicitId) return explicitId;
     const href = item.querySelector('a')?.getAttribute('href') || '';
     return href.replace(/\.html$/, '').split('/').pop() || '';
+  }
+
+  function formatPreviewTime(record) {
+    const timestamp = Number(record.timestamp);
+    if (!Number.isFinite(timestamp) || timestamp <= 0) return record.time || '';
+
+    const elapsed = Math.max(0, Date.now() - timestamp);
+    if (elapsed < 60_000) return 'Now';
+    if (elapsed < 3_600_000) return `${Math.floor(elapsed / 60_000)}m ago`;
+    if (elapsed < 86_400_000) return `${Math.floor(elapsed / 3_600_000)}h ago`;
+    return new Date(timestamp).toLocaleDateString([], { month: 'numeric', day: 'numeric' });
+  }
+
+  function updateConversationPreview(item, record) {
+    if (!record || typeof record.text !== 'string') return;
+    const preview = item.querySelector('.conversation-bottom p');
+    const time = item.querySelector('.conversation-top time');
+    if (!preview || !time) return;
+
+    const author = item.dataset.conversationId === 'gold-squad'
+      ? `${displayAuthor(record.author || 'You')}: `
+      : '';
+    preview.textContent = `${author}${record.text}`;
+    time.textContent = formatPreviewTime(record);
+
+    const timestamp = Number(record.timestamp);
+    if (Number.isFinite(timestamp) && timestamp > 0) {
+      time.dateTime = new Date(timestamp).toISOString();
+      item.dataset.lastActivity = String(timestamp);
+    } else {
+      time.removeAttribute('datetime');
+      delete item.dataset.lastActivity;
+    }
+  }
+
+  function updateHomeConversationPreviews() {
+    const list = document.querySelector('.conversation-list');
+    if (!list) return;
+
+    const items = [...list.querySelectorAll('.conversation-item')];
+    const originalOrder = new Map(items.map((item, index) => [item, index]));
+    items.forEach((item) => {
+      const history = readStorage(messageStorageKey(conversationItemId(item)), []);
+      if (!Array.isArray(history)) {
+        console.error(`MutantComms found invalid saved message history for "${conversationItemId(item)}".`);
+        return;
+      }
+      const latest = [...history].reverse().find((record) =>
+        record && typeof record.text === 'string' && typeof record.time === 'string');
+      if (latest) updateConversationPreview(item, latest);
+    });
+
+    items.sort((left, right) => {
+      const leftActivity = Number(left.dataset.lastActivity) || 0;
+      const rightActivity = Number(right.dataset.lastActivity) || 0;
+      return rightActivity - leftActivity || originalOrder.get(left) - originalOrder.get(right);
+    });
+    list.append(...items);
   }
 
   function getUnreadStates() {
@@ -125,6 +183,17 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       noResults.hidden = visibleCount !== 0;
     });
+  }
+
+  function initializeConversationPreviews() {
+    updateHomeConversationPreviews();
+    window.addEventListener('pageshow', updateHomeConversationPreviews);
+    window.addEventListener('storage', (event) => {
+      if (event.key?.startsWith(`${STORAGE_PREFIX}messages:`)) {
+        updateHomeConversationPreviews();
+      }
+    });
+    window.setInterval(updateHomeConversationPreviews, 60_000);
   }
 
   function applyUnreadState(item, count, animate = false) {
@@ -240,10 +309,35 @@ document.addEventListener('DOMContentLoaded', () => {
         historyChanged = true;
       }
     });
-    if (historyChanged) writeStorage(messageStorageKey(), storedMessages);
+
+    const seedRecords = initialGroups.flatMap((group) => {
+      const bubble = group.querySelector('.message-bubble');
+      if (!bubble) return [];
+      const author = group.querySelector('.message-author')?.textContent.trim() || '';
+      const record = {
+        id: group.dataset.messageId,
+        text: bubble.querySelector('p')?.textContent || '',
+        time: bubble.querySelector('time')?.textContent.trim() || ''
+      };
+      if (author) record.author = displayAuthor(author);
+      return [record];
+    });
+    const seedIds = new Set(seedRecords.map((record) => record.id));
+    const storedSeedRecords = new Map(storedMessages
+      .filter((record) => record && seedIds.has(record.id))
+      .map((record) => [record.id, record]));
+    const messageHistory = [
+      ...seedRecords.map((record) => storedSeedRecords.get(record.id) || record),
+      ...storedMessages.filter((record) => !record || !seedIds.has(record.id))
+    ];
+    if (messageHistory.length !== storedMessages.length ||
+        messageHistory.some((record, index) => record?.id !== storedMessages[index]?.id)) {
+      historyChanged = true;
+    }
+    if (historyChanged) writeStorage(messageStorageKey(), messageHistory);
 
     const existingIds = new Set(initialGroups.map((group) => group.dataset.messageId));
-    storedMessages.forEach((record) => {
+    messageHistory.forEach((record) => {
       if (!record || typeof record.id !== 'string' || existingIds.has(record.id) ||
           typeof record.text !== 'string' || typeof record.time !== 'string') return;
       messages.insertBefore(createMessageGroup(record), messages.querySelector('.typing-row'));
@@ -251,6 +345,32 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     messages.scrollTop = messages.scrollHeight;
+    updateHomeConversationPreviews();
+
+    window.addEventListener('storage', (event) => {
+      if (event.key !== messageStorageKey() || !event.newValue) return;
+      let history;
+      try {
+        history = JSON.parse(event.newValue);
+      } catch (error) {
+        console.error(`MutantComms could not parse updated message history for "${conversation}".`, error);
+        return;
+      }
+      if (!Array.isArray(history)) {
+        console.error(`MutantComms found invalid updated message history for "${conversation}".`);
+        return;
+      }
+
+      const existingIds = new Set([...messages.querySelectorAll('.message-group')]
+        .map((group) => group.dataset.messageId));
+      history.forEach((record) => {
+        if (!record || typeof record.id !== 'string' || existingIds.has(record.id) ||
+            typeof record.text !== 'string' || typeof record.time !== 'string') return;
+        messages.insertBefore(createMessageGroup(record), messages.querySelector('.typing-row'));
+        existingIds.add(record.id);
+      });
+      updateHomeConversationPreviews();
+    });
   }
 
   function createMessageGroup(record) {
@@ -273,6 +393,9 @@ document.addEventListener('DOMContentLoaded', () => {
     text.textContent = record.text;
     const time = document.createElement('time');
     time.textContent = record.time;
+    if (Number.isFinite(Number(record.timestamp)) && Number(record.timestamp) > 0) {
+      time.dateTime = new Date(Number(record.timestamp)).toISOString();
+    }
     bubble.append(text, time);
     article.append(bubble);
     return article;
@@ -288,6 +411,7 @@ document.addEventListener('DOMContentLoaded', () => {
       history.push(record);
       writeStorage(messageStorageKey(), history);
     }
+    updateHomeConversationPreviews();
   }
 
   function initializeTypingIndicator() {
@@ -361,10 +485,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const nearBottom = messages.scrollHeight - messages.scrollTop - messages.clientHeight < 60;
+      const timestamp = Date.now();
       const record = {
         id: `user-${window.crypto?.randomUUID?.() || `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`}`,
         text,
-        time: formatTime()
+        time: formatTime(new Date(timestamp)),
+        timestamp
       };
       const article = createMessageGroup(record);
       article.classList.add('message-enter');
@@ -380,7 +506,23 @@ document.addEventListener('DOMContentLoaded', () => {
       updateComposer();
       setTypingVisible(typing, true);
       try {
-        await requestCharacterResponse(text);
+        const response = await requestCharacterResponse(text);
+        const responseText = typeof response === 'string' ? response : response?.text;
+        if (typeof responseText === 'string' && responseText.trim()) {
+          const receivedAt = Date.now();
+          const receivedRecord = {
+            id: `received-${window.crypto?.randomUUID?.() || `${receivedAt.toString(36)}-${Math.random().toString(36).slice(2)}`}`,
+            author: typeof response?.author === 'string' && response.author.trim()
+              ? displayAuthor(response.author.trim())
+              : conversation === 'gold-squad' ? 'Gold Squad' : pageTitle,
+            text: responseText.trim(),
+            time: formatTime(new Date(receivedAt)),
+            timestamp: receivedAt
+          };
+          messages.insertBefore(createMessageGroup(receivedRecord), typing);
+          persistMessage(receivedRecord);
+          if (nearBottom) messages.scrollTop = messages.scrollHeight;
+        }
       } catch (error) {
         console.error('MutantComms local response handler failed.', error);
       } finally {
@@ -745,6 +887,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initializeInfoPanel();
   initializeSearch();
   initializeNotifications();
+  initializeConversationPreviews();
 
   if (isChatPage) {
     initializeConversationMessages();
