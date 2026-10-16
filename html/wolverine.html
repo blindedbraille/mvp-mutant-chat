@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wolverine - MutantComms</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="../js/main.js" defer></script>
+</head>
+
+<body>
+    <main class="page-shell chat-page">
+
+        <section class="presentation-board">
+            <div class="brand-mark"><span class="mutant">MUTANT</span><span class="comms">COMMS</span>.COM</div>
+
+            <section class="phone-shell" aria-label="MutantComms Wolverine chat" data-conversation-id="wolverine">
+                <header class="chat-topbar">
+                    <div class="connection-status">
+                        <span class="status-indicator"></span>
+                        <span>MutantComms Network</span>
+                    </div>
+                    <div class="phone-status">
+                        <span class="cell-bars" aria-hidden="true"></span>
+                        <span class="wifi" aria-hidden="true"></span>
+                        <span class="battery" aria-hidden="true"></span>
+                    </div>
+                </header>
+
+                <header class="chat-header-row">
+                    <button class="back-button" type="button" aria-label="Back" onclick="window.location.href='index.html'">←</button>
+                    <div class="chat-user">
+                        <div class="group-avatar" aria-hidden="true"></div>
+                        <div class="chat-title">
+                            <h1>Wolverine</h1>
+                            <p>Online</p>
+                        </div>
+                    </div>
+                    <button class="info-button" type="button" aria-label="Info">i</button>
+                </header>
+
+                <aside class="info-panel" aria-live="polite">
+                    <h3>Contact Info</h3>
+                    <ul>
+                        <li>Wolverine</li>
+                    </ul>
+                </aside>
+
+                <section class="chat-messages" aria-live="polite">
+                    <article class="message-group" data-message-id="seed-320de0">
+                        <h2 class="message-author">Wolverine</h2>
+                        <div class="message-bubble">
+                            <p>Who borrowed the thermos I left on the loading desk?</p>
+                            <time>10:41 AM</time>
+                        </div>
+                    </article>
+
+                    <article class="message-group message-you" data-message-id="seed-1dy1sjw">
+                        <div class="message-bubble">
+                            <p>I didn't move it.</p>
+                            <time>10:42 AM</time>
+                        </div>
+                    </article>
+
+                    <article class="message-group" data-message-id="seed-1vyjp33">
+                        <h2 class="message-author">Wolverine</h2>
+                        <div class="message-bubble">
+                            <p>You say that every time. Check the loading log with me?</p>
+                            <time>10:43 AM</time>
+                        </div>
+                    </article>
+
+                    <div class="typing-row" aria-label="Wolverine is typing">
+                        <span class="typing-dot" aria-hidden="true"></span>
+                        <span>Wolverine is typing...</span>
+                    </div>
+                </section>
+
+                <form class="message-composer" aria-label="Send message">
+                    <input type="text" maxlength="1200" placeholder="Send a message..." aria-label="Type a message">
+                    <button class="send-button" type="submit" aria-label="Send"></button>
+                </form>
+
+                <nav class="bottom-nav" aria-label="Primary Navigation">
+                    <a class="nav-item active" href="index.html">
+                        <span class="nav-icon messages" aria-hidden="true"></span>
+                        <span>Messages</span>
+                    </a>
+                    <a class="nav-item" href="#">
+                        <span class="nav-icon mutants" aria-hidden="true"></span>
+                        <span>Mutants</span>
+                    </a>
+                    <a class="nav-item" href="#">
+                        <span class="nav-icon danger" aria-hidden="true"></span>
+                        <span>Field Desk</span>
+                    </a>
+                </nav>
+            </section>
+        </section>
+    </main>
+</body>
+
+</html>
