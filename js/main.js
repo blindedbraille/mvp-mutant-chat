@@ -7,6 +7,24 @@ document.addEventListener('DOMContentLoaded', () => {
   const MAX_MESSAGE_LENGTH = 1200;
   const MAX_AVATAR_FILE_SIZE = 8 * 1024 * 1024;
   const AVATAR_SIZE = 512;
+  const CHARACTER_AVATARS = {
+    'Gold Squad': 'images/gold-squad-pfp.jpeg',
+    Deadpool: 'images/deadpool-pfp.jpg',
+    Cable: 'images/cable-pfp.jpg',
+    Wolverine: 'images/wolverine-pfp.webp',
+    Storm: 'images/storm-pfp.jpg',
+    Beast: 'images/beast-pfp.webp',
+    'Marvel Girl': 'images/marvel-girl-pfp.jpeg'
+  };
+  const AVATAR_POSITIONS = {
+    'Gold Squad': '50% 50%',
+    Deadpool: '50% 42%',
+    Cable: '50% 42%',
+    Wolverine: '50% 28%',
+    Storm: '50% 27%',
+    Beast: '50% 43%',
+    'Marvel Girl': '50% 29%'
+  };
   const PROFILE_VIBES = ['', 'Funny', 'Serious', 'Mysterious', 'Stylish', 'Chaotic'];
   const LEGACY_AUTHOR_NAMES = {
     Oriana: 'Storm',
@@ -116,11 +134,15 @@ document.addEventListener('DOMContentLoaded', () => {
       'Gold Squad': '#786631'
     };
     element.style.setProperty('--avatar-bg', avatarColors[isUser ? 'You' : name] || '#596579');
+    element.style.setProperty('--avatar-position', isUser ? '50% 50%' : AVATAR_POSITIONS[name] || '50% 50%');
     element.textContent = isUser ? 'YOU' : avatarInitials(name);
     element.style.backgroundImage = '';
     if (isUser && profileImageUrl) {
       element.textContent = '';
       element.style.backgroundImage = `url("${profileImageUrl}")`;
+    } else if (!isUser && CHARACTER_AVATARS[name]) {
+      element.textContent = '';
+      element.style.backgroundImage = `url("${CHARACTER_AVATARS[name]}")`;
     }
   }
 
@@ -305,6 +327,105 @@ document.addEventListener('DOMContentLoaded', () => {
     return element;
   }
 
+  function initializeWelcomeExperience() {
+    const completedKey = `${STORAGE_PREFIX}onboarding:complete`;
+    const overlay = createSettingsElement('div', 'welcome-overlay');
+    overlay.hidden = true;
+    const dialog = createSettingsElement('section', 'welcome-dialog');
+    dialog.setAttribute('role', 'dialog');
+    dialog.setAttribute('aria-modal', 'true');
+    dialog.setAttribute('aria-labelledby', 'welcome-dialog-title');
+    dialog.setAttribute('aria-describedby', 'welcome-dialog-copy welcome-fan-note');
+
+    const eyebrow = createSettingsElement('p', 'welcome-eyebrow', 'Cerebro // Secure channel established');
+    const title = createSettingsElement('h1', '', 'Welcome to MutantComms');
+    title.id = 'welcome-dialog-title';
+    const copy = createSettingsElement('p', 'welcome-dialog-copy',
+      'Your signal just reached the X-Men. Drop into simulated conversations with mutant characters and see how they answer back.');
+    copy.id = 'welcome-dialog-copy';
+    const featureList = createSettingsElement('ul', 'welcome-feature-list');
+    [
+      ['01', 'Character chats', 'Message the mutants already on this network.'],
+      ['02', 'Emoji reactions', 'Tap a bubble to leave your mark.'],
+      ['03', 'Make it yours', 'Set a profile picture and choose your avatar vibe.'],
+      ['04', 'Keep exploring', 'Look out for hidden interactions as you chat.']
+    ].forEach(([number, heading, description]) => {
+      const item = createSettingsElement('li');
+      item.append(
+        createSettingsElement('span', 'welcome-feature-number', number),
+        createSettingsElement('span', 'welcome-feature-text')
+      );
+      const text = item.querySelector('.welcome-feature-text');
+      text.append(createSettingsElement('strong', '', heading), createSettingsElement('span', '', description));
+      featureList.append(item);
+    });
+    const fanNote = createSettingsElement('p', 'welcome-fan-note',
+      'Fan-made interactive experience. Conversations are simulated; this is not a real messaging service or an official Marvel product.');
+    fanNote.id = 'welcome-fan-note';
+    const actions = createSettingsElement('div', 'welcome-actions');
+    const enter = createSettingsElement('button', 'welcome-enter', 'Enter MutantComms');
+    enter.type = 'button';
+    const close = createSettingsElement('button', 'welcome-close', 'Close');
+    close.type = 'button';
+    const status = createSettingsElement('p', 'welcome-status');
+    status.setAttribute('role', 'status');
+    actions.append(enter, close);
+    dialog.append(eyebrow, title, copy, featureList, fanNote, actions, status);
+    overlay.append(dialog);
+    document.body.append(overlay);
+
+    let returning = readStorage(completedKey, false) === true;
+    let previousFocus = null;
+    const hide = () => {
+      overlay.hidden = true;
+      document.body.classList.remove('welcome-open');
+      previousFocus?.focus();
+    };
+    const open = () => {
+      returning = readStorage(completedKey, false) === true;
+      close.hidden = !returning;
+      status.textContent = '';
+      previousFocus = document.activeElement;
+      overlay.hidden = false;
+      document.body.classList.add('welcome-open');
+      enter.focus();
+    };
+    enter.addEventListener('click', () => {
+      const saved = writeStorage(completedKey, true);
+      returning = true;
+      close.hidden = false;
+      if (!saved) {
+        status.textContent = 'Your browser could not save this choice, so the welcome message may appear again next visit.';
+      }
+      hide();
+    });
+    close.addEventListener('click', hide);
+    dialog.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        if (returning) hide();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = [...dialog.querySelectorAll('button:not([hidden])')];
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    });
+    overlay.addEventListener('click', (event) => {
+      if (event.target === overlay && returning) hide();
+    });
+
+    if (!returning) open();
+    return open;
+  }
+
   function createSettingsPanel() {
     const shell = document.querySelector('.phone-shell');
     if (!shell) return null;
@@ -328,8 +449,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const close = createSettingsElement('button', 'settings-close', '×');
     close.type = 'button';
     close.setAttribute('aria-label', 'Close settings');
+    const about = createSettingsElement('button', 'settings-about', 'About MutantComms');
+    about.type = 'button';
     const titleRow = createSettingsElement('div', 'settings-title-row');
-    titleRow.append(heading, close);
+    titleRow.append(heading, about, close);
 
     const profileHeading = createSettingsElement('h3', '', 'Your profile picture');
     const profileRow = createSettingsElement('div', 'profile-picture-row');
@@ -346,6 +469,23 @@ document.addEventListener('DOMContentLoaded', () => {
     fileInput.setAttribute('aria-label', 'Choose a profile picture');
     fileLabel.append(fileInput);
     profileRow.append(previewWrap, fileLabel);
+
+    const cropEditor = createSettingsElement('div', 'avatar-crop-editor');
+    cropEditor.hidden = true;
+    const cropViewport = createSettingsElement('div', 'avatar-crop-viewport');
+    const cropPreview = createSettingsElement('img', 'avatar-crop-preview');
+    cropPreview.alt = 'Drag to reposition your profile picture';
+    cropViewport.append(cropPreview);
+    const cropControls = createSettingsElement('label', 'avatar-crop-control', 'Zoom');
+    const cropZoom = createSettingsElement('input', 'avatar-crop-zoom');
+    cropZoom.type = 'range';
+    cropZoom.min = '1';
+    cropZoom.max = '3';
+    cropZoom.step = '0.05';
+    cropZoom.value = '1';
+    cropZoom.setAttribute('aria-label', 'Zoom profile picture');
+    cropControls.append(cropZoom);
+    cropEditor.append(cropViewport, cropControls);
 
     const vibeLabel = createSettingsElement('label', 'settings-field', 'Avatar vibe (optional)');
     const vibe = createSettingsElement('select', 'profile-vibe');
@@ -371,7 +511,7 @@ document.addEventListener('DOMContentLoaded', () => {
     actions.append(save, remove);
     const status = createSettingsElement('p', 'settings-status');
     status.setAttribute('role', 'status');
-    panel.append(titleRow, profileHeading, profileRow, vibeLabel, spicyLabel, actions, status);
+    panel.append(titleRow, profileHeading, profileRow, cropEditor, vibeLabel, spicyLabel, actions, status);
     shell.append(panel);
     trigger.setAttribute('aria-controls', panel.id);
     trigger.setAttribute('aria-expanded', 'false');
@@ -379,7 +519,24 @@ document.addEventListener('DOMContentLoaded', () => {
     let pendingAvatarBlob = null;
     let stagedPreviewUrl = '';
     let avatarLoadRevision = 0;
+    let cropZoomLevel = 1;
+    let cropOffsetX = 0;
+    let cropOffsetY = 0;
     const setStatus = (message) => { status.textContent = message; };
+    const updateCropPreview = () => {
+      const size = cropViewport.clientWidth;
+      const imageWidth = cropPreview.naturalWidth || size;
+      const imageHeight = cropPreview.naturalHeight || size;
+      const renderedWidth = Math.max(size, size * imageWidth / imageHeight);
+      const renderedHeight = Math.max(size, size * imageHeight / imageWidth);
+      cropOffsetX = Math.max(-(renderedWidth * cropZoomLevel - size) / 2,
+        Math.min((renderedWidth * cropZoomLevel - size) / 2, cropOffsetX));
+      cropOffsetY = Math.max(-(renderedHeight * cropZoomLevel - size) / 2,
+        Math.min((renderedHeight * cropZoomLevel - size) / 2, cropOffsetY));
+      cropPreview.style.transform = `translate(${cropOffsetX}px, ${cropOffsetY}px) scale(${cropZoomLevel})`;
+      const previewScale = previewWrap.clientWidth / size;
+      preview.style.transform = `translate(${cropOffsetX * previewScale}px, ${cropOffsetY * previewScale}px) scale(${cropZoomLevel})`;
+    };
     const refreshProfilePicture = () => {
       const loadRevision = ++avatarLoadRevision;
       readProfilePicture().then((blob) => {
@@ -428,10 +585,9 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error('This browser cannot resize images locally. Try a newer browser.');
       }
       const bitmap = await createImageBitmap(file);
-      const scale = Math.min(1, AVATAR_SIZE / Math.max(bitmap.width, bitmap.height));
       const canvas = document.createElement('canvas');
-      canvas.width = Math.max(1, Math.round(bitmap.width * scale));
-      canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+      canvas.width = AVATAR_SIZE;
+      canvas.height = AVATAR_SIZE;
       const context = canvas.getContext('2d');
       if (!context) {
         bitmap.close();
@@ -439,7 +595,19 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       context.fillStyle = '#121721';
       context.fillRect(0, 0, canvas.width, canvas.height);
-      context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      const coverScale = Math.max(AVATAR_SIZE / bitmap.width, AVATAR_SIZE / bitmap.height);
+      const cropSize = AVATAR_SIZE / (coverScale * cropZoomLevel);
+      const previewSize = cropViewport.clientWidth;
+      const screenScale = previewSize * coverScale / AVATAR_SIZE * cropZoomLevel;
+      const sourceX = Math.max(0, Math.min(
+        bitmap.width - cropSize,
+        (bitmap.width - cropSize) / 2 - cropOffsetX / screenScale
+      ));
+      const sourceY = Math.max(0, Math.min(
+        bitmap.height - cropSize,
+        (bitmap.height - cropSize) / 2 - cropOffsetY / screenScale
+      ));
+      context.drawImage(bitmap, sourceX, sourceY, cropSize, cropSize, 0, 0, AVATAR_SIZE, AVATAR_SIZE);
       bitmap.close();
       return new Promise((resolve, reject) => {
         canvas.toBlob((blob) => {
@@ -459,6 +627,11 @@ document.addEventListener('DOMContentLoaded', () => {
       panel.hidden = true;
       trigger.setAttribute('aria-expanded', 'false');
       trigger.focus();
+    });
+    about.addEventListener('click', () => {
+      panel.hidden = true;
+      trigger.setAttribute('aria-expanded', 'false');
+      openWelcomeExperience();
     });
     document.addEventListener('click', (event) => {
       if (!panel.hidden && !panel.contains(event.target) && !trigger.contains(event.target)) {
@@ -492,7 +665,33 @@ document.addEventListener('DOMContentLoaded', () => {
       preview.src = stagedPreviewUrl;
       preview.hidden = false;
       placeholder.hidden = true;
-      setStatus('Preview ready. Save profile to keep it on this device.');
+      cropPreview.src = stagedPreviewUrl;
+      cropEditor.hidden = false;
+      cropZoomLevel = 1;
+      cropOffsetX = 0;
+      cropOffsetY = 0;
+      cropZoom.value = '1';
+      cropPreview.onload = updateCropPreview;
+      updateCropPreview();
+      setStatus('Drag the preview to reposition it, adjust zoom, then save.');
+    });
+    cropZoom.addEventListener('input', () => {
+      cropZoomLevel = Number(cropZoom.value);
+      updateCropPreview();
+    });
+    let dragStart = null;
+    cropViewport.addEventListener('pointerdown', (event) => {
+      dragStart = { x: event.clientX, y: event.clientY, offsetX: cropOffsetX, offsetY: cropOffsetY };
+      cropViewport.setPointerCapture(event.pointerId);
+    });
+    cropViewport.addEventListener('pointermove', (event) => {
+      if (!dragStart) return;
+      cropOffsetX = dragStart.offsetX + event.clientX - dragStart.x;
+      cropOffsetY = dragStart.offsetY + event.clientY - dragStart.y;
+      updateCropPreview();
+    });
+    ['pointerup', 'pointercancel'].forEach((type) => {
+      cropViewport.addEventListener(type, () => { dragStart = null; });
     });
     spicy.checked = spicyMode;
     spicy.addEventListener('change', () => saveSpicyMode(spicy.checked));
@@ -510,6 +709,8 @@ document.addEventListener('DOMContentLoaded', () => {
           remove.disabled = false;
           pendingAvatarBlob = null;
           fileInput.value = '';
+          cropEditor.hidden = true;
+          preview.style.transform = '';
           if (stagedPreviewUrl) URL.revokeObjectURL(stagedPreviewUrl);
           stagedPreviewUrl = '';
           setStatus('Profile picture saved on this device.');
@@ -540,6 +741,8 @@ document.addEventListener('DOMContentLoaded', () => {
         remove.disabled = true;
         pendingAvatarBlob = null;
         fileInput.value = '';
+        cropEditor.hidden = true;
+        preview.style.transform = '';
         if (stagedPreviewUrl) URL.revokeObjectURL(stagedPreviewUrl);
         stagedPreviewUrl = '';
         if (setMeta(false, vibe.value, Boolean(currentProfileMeta.hasPicture))) {
@@ -611,7 +814,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const items = [...list.querySelectorAll('.conversation-item')];
     const noResults = document.createElement('p');
     noResults.className = 'search-empty';
-    noResults.textContent = 'No matching contacts found';
     noResults.setAttribute('aria-live', 'polite');
     noResults.hidden = true;
     list.after(noResults);
@@ -624,8 +826,27 @@ document.addEventListener('DOMContentLoaded', () => {
         item.hidden = !matches;
         if (matches) visibleCount += 1;
       });
+      noResults.textContent = query
+        ? `No matches for “${input.value.trim()}”. Try a character name such as Storm, Cable or Wolverine.`
+        : '';
       noResults.hidden = visibleCount !== 0;
     });
+  }
+
+  function initializeArchiveAccess() {
+    const anchor = createSettingsElement('a', 'archive-quick-link');
+    anchor.href = 'field-archive.html';
+    anchor.setAttribute('aria-label', 'Open the X-Men Field Archive');
+    const icon = createSettingsElement('span', 'archive-quick-icon', '▤');
+    icon.setAttribute('aria-hidden', 'true');
+    anchor.append(icon, createSettingsElement('span', '', 'Archive'));
+
+    const messengerHeader = document.querySelector('.messenger-header');
+    const topbar = document.querySelector('.chat-topbar');
+    const settings = document.querySelector('.messenger-header .settings-button');
+    const phoneStatus = topbar?.querySelector('.phone-status');
+    if (messengerHeader && settings) messengerHeader.insertBefore(anchor, settings);
+    else if (topbar && phoneStatus) topbar.insertBefore(anchor, phoneStatus);
   }
 
   function initializeConversationPreviews() {
@@ -1318,6 +1539,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderReactionBadges(group, counts, selectedEmoji = '') {
     group.querySelectorAll('.reaction-badge').forEach((badge) => badge.remove());
+    const content = group.querySelector('.message-content');
+    if (!content) return;
     Object.entries(counts).forEach(([emoji, count]) => {
       if (count <= 0) return;
       const badge = document.createElement('div');
@@ -1327,7 +1550,7 @@ document.addEventListener('DOMContentLoaded', () => {
       symbol.className = 'reaction-symbol';
       symbol.textContent = emoji;
       badge.append(symbol, document.createTextNode(String(count)));
-      group.append(badge);
+      content.append(badge);
     });
   }
 
@@ -1498,7 +1721,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  const openWelcomeExperience = initializeWelcomeExperience();
   createSettingsPanel();
+  initializeArchiveAccess();
   decorateVisibleAvatars();
   initializeNetworkIndicator();
   initializeInfoPanel();

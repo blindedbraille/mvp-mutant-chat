@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#10151f">
+    <meta name="description" content="Open the MutantComms X-Men Field Archive: a sourced guide to mutant origins, creators, powers and essential comics.">
+    <title>X-Men Field Archive - MutantComms</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/field-archive.css">
+    <script src="js/field-archive.js" defer></script>
+</head>
+<body class="archive-page">
+    <header class="archive-masthead">
+        <a class="archive-wordmark" href="index.html"><span>MUTANT</span>COMMS <small>// FIELD ARCHIVE</small></a>
+        <a class="archive-return" href="index.html">← Return to MutantComms</a>
+    </header>
+
+    <main class="archive-main">
+        <section class="archive-cover" aria-labelledby="archive-title" data-archive-cover>
+            <div class="cover-topline"><span>FIELD ARCHIVE</span><span>EST. 1963 // OPEN TRANSMISSION</span></div>
+            <div class="cover-grid">
+                <div class="cover-copy">
+                    <p class="cover-kicker">Mutant histories, decoded</p>
+                    <h1 id="archive-title">X-Men<br><em>Field Archive</em></h1>
+                    <p class="cover-intro">A field guide to the people behind the powers: where their stories began, who brought them to the page, and which comics to read next.</p>
+                    <div class="cover-stamp"><span>READ</span><strong>THE<br>FILES</strong></div>
+                </div>
+                <div class="cover-art" aria-hidden="true">
+                    <div class="cover-orbit orbit-one"></div>
+                    <div class="cover-orbit orbit-two"></div>
+                    <span class="cover-x">X</span>
+                    <span class="cover-art-caption">MUTANT // DOSSIER NO. 01</span>
+                </div>
+            </div>
+            <div class="cover-footer">
+                <p>Tap a dossier to open a character file. Every debut, creator credit and reading pick links to its research trail.</p>
+                <span>UNOFFICIAL FAN-MADE REFERENCE</span>
+            </div>
+        </section>
+
+        <section class="archive-index" aria-labelledby="index-title" data-archive-index>
+            <div class="index-heading">
+                <div>
+                    <p class="archive-kicker">The files</p>
+                    <h2 id="index-title">Choose your subject</h2>
+                </div>
+                <label class="archive-search-label" for="archive-search">Search archive
+                    <input id="archive-search" type="search" placeholder="Name, codename or power">
+                </label>
+            </div>
+            <p class="archive-empty" role="status" hidden>No dossier matches that search. Try a character name or ability.</p>
+            <div class="dossier-grid">
+                <button class="dossier-card dossier-card--gold" type="button" data-open-profile="wolverine" data-search="wolverine logan healing claws">
+                    <span class="dossier-number">01</span><span class="dossier-glyph">SNIKT</span><span class="dossier-name">Wolverine</span><span class="dossier-identity">Logan // Weapon X</span><span class="dossier-open">Open file ↗</span>
+                </button>
+                <button class="dossier-card dossier-card--blue" type="button" data-open-profile="storm" data-search="storm ororo munroe weather lightning">
+                    <span class="dossier-number">02</span><span class="dossier-glyph">ATMOS</span><span class="dossier-name">Storm</span><span class="dossier-identity">Ororo Munroe // Weather Witch</span><span class="dossier-open">Open file ↗</span>
+                </button>
+                <button class="dossier-card dossier-card--red" type="button" data-open-profile="deadpool" data-search="deadpool wade wilson healing regeneration">
+                    <span class="dossier-number">03</span><span class="dossier-glyph">404</span><span class="dossier-name">Deadpool</span><span class="dossier-identity">Wade Wilson // Merc with a Mouth</span><span class="dossier-open">Open file ↗</span>
+                </button>
+                <button class="dossier-card dossier-card--green" type="button" data-open-profile="jean-grey" data-search="jean grey marvel girl phoenix telepathy telekinesis">
+                    <span class="dossier-number">04</span><span class="dossier-glyph">PHOENIX</span><span class="dossier-name">Marvel Girl</span><span class="dossier-identity">Jean Grey // Phoenix</span><span class="dossier-open">Open file ↗</span>
+                </button>
+                <button class="dossier-card dossier-card--blue" type="button" data-open-profile="beast" data-search="beast hank mccoy strength agility genius">
+                    <span class="dossier-number">05</span><span class="dossier-glyph">LAB</span><span class="dossier-name">Beast</span><span class="dossier-identity">Hank McCoy // Scholar</span><span class="dossier-open">Open file ↗</span>
+                </button>
+                <button class="dossier-card dossier-card--gold" type="button" data-open-profile="cable" data-search="cable nathan summers time travel telepathy telekinesis">
+                    <span class="dossier-number">06</span><span class="dossier-glyph">2099</span><span class="dossier-name">Cable</span><span class="dossier-identity">Nathan Summers // Soldier from tomorrow</span><span class="dossier-open">Open file ↗</span>
+                </button>
+                <button class="dossier-card dossier-card--red" type="button" data-open-profile="cyclops" data-search="cyclops scott summers optic force beams leader">
+                    <span class="dossier-number">07</span><span class="dossier-glyph">OPTIC</span><span class="dossier-name">Cyclops</span><span class="dossier-identity">Scott Summers // Field leader</span><span class="dossier-open">Open file ↗</span>
+                </button>
+                <button class="dossier-card dossier-card--blue" type="button" data-open-profile="professor-x" data-search="professor x charles xavier telepathy">
+                    <span class="dossier-number">08</span><span class="dossier-glyph">CEREBRO</span><span class="dossier-name">Professor X</span><span class="dossier-identity">Charles Xavier // Founder</span><span class="dossier-open">Open file ↗</span>
+                </button>
+                <button class="dossier-card dossier-card--red" type="button" data-open-profile="magneto" data-search="magneto max eisenhardt magnetism">
+                    <span class="dossier-number">09</span><span class="dossier-glyph">POLAR</span><span class="dossier-name">Magneto</span><span class="dossier-identity">Max Eisenhardt // Master of Magnetism</span><span class="dossier-open">Open file ↗</span>
+                </button>
+                <button class="dossier-card dossier-card--gold" type="button" data-open-profile="nightcrawler" data-search="nightcrawler kurt wagner teleportation">
+                    <span class="dossier-number">10</span><span class="dossier-glyph">BAMF</span><span class="dossier-name">Nightcrawler</span><span class="dossier-identity">Kurt Wagner // The Fuzzy Elf</span><span class="dossier-open">Open file ↗</span>
+                </button>
+                <button class="dossier-card dossier-card--green" type="button" data-open-profile="rogue" data-search="rogue anna marie absorption memories powers">
+                    <span class="dossier-number">11</span><span class="dossier-glyph">TOUCH</span><span class="dossier-name">Rogue</span><span class="dossier-identity">Anna Marie // Uncanny X-Man</span><span class="dossier-open">Open file ↗</span>
+                </button>
+            </div>
+        </section>
+
+        <section class="character-file" id="file-wolverine" data-profile="wolverine" aria-labelledby="title-wolverine" hidden>
+            <header class="file-header file-header--gold"><button class="back-to-index" type="button">← All dossiers</button><span>FILE 01 // CANADA</span></header>
+            <div class="file-hero"><p class="file-kicker">Weapon X // X-Man</p><h2 id="title-wolverine">Wolverine</h2><p class="file-subtitle">Logan · James Howlett</p><p class="file-debut">First full appearance <strong>The Incredible Hulk #181 · 1974</strong></p></div>
+            <div class="file-layout"><aside class="file-quote">“I'm the best there is at what I do.”<span>— Logan</span></aside><div class="file-main">
+                <section><h3>Origin // Field notes</h3><p>Born in 19th-century Canada, Logan's mutation includes accelerated healing and retractable bone claws. The Weapon X program later bonded adamantium to his skeleton and erased much of his memory. His long, fragmented life eventually brings him into the X-Men, where a lone survivor becomes part of a team.</p></section>
+                <section class="file-credit"><h3>Creators // first full debut</h3><p>Len Wein (writer); John Romita Sr. (character design); Herb Trimpe (artist on the full debut). The teaser appeared in <i>The Incredible Hulk</i> #180; #181 is the full debut.</p></section>
+                <section><h3>Powers &amp; skills</h3><p>Accelerated healing, heightened senses, an extended lifespan, retractable claws, and exceptional close-quarters combat skill. Adamantium is the result of experimentation, not his original mutation.</p></section>
+                <section class="file-fact"><h3>Margin note</h3><p>His first appearance is a two-part publication story: a final-panel teaser in <i>The Incredible Hulk</i> #180, followed by the full debut in #181. John Romita Sr. designed the character; Len Wein wrote the debut and Herb Trimpe drew it.</p></section>
+                <section><h3>Start reading</h3><ul><li><i>Giant-Size X-Men</i> #1 (1975)</li><li><i>Wolverine</i> #1–4 (1982), by Chris Claremont and Frank Miller</li><li>“Weapon X,” <i>Marvel Comics Presents</i> #72–84 (1991)</li></ul></section>
+            </div></div>
+            <footer class="file-sources"><h3>Research trail</h3><a href="https://en.wikipedia.org/wiki/Wolverine_(character)">Publication history &amp; cited references</a><a href="https://www.marvel.com/characters/wolverine-logan">Marvel character profile</a><a href="https://www.comics.org/searchNew/?q=The+Incredible+Hulk+181&amp;search_object=issue&amp;method=icontains">Grand Comics Database issue records</a></footer>
+        </section>
+
+        <section class="character-file" id="file-storm" data-profile="storm" aria-labelledby="title-storm" hidden>
+            <header class="file-header file-header--blue"><button class="back-to-index" type="button">← All dossiers</button><span>FILE 02 // KENYA</span></header>
+            <div class="file-hero"><p class="file-kicker">Queen // X-Man</p><h2 id="title-storm">Storm</h2><p class="file-subtitle">Ororo Munroe</p><p class="file-debut">First appearance <strong>Giant-Size X-Men #1 · 1975</strong></p></div>
+            <div class="file-layout"><aside class="file-quote">A leader who can change the weather—and the room.<span>— Field archive</span></aside><div class="file-main">
+                <section><h3>Origin // Field notes</h3><p>Ororo Munroe was born in New York and grew up in Cairo before journeying to Kenya. Her weather-manipulating mutant gift led some people to revere her as a goddess. Professor X recruits her to the new international X-Men team in 1975; she grows into one of its most trusted leaders.</p></section>
+                <section class="file-credit"><h3>Creators // team debut</h3><p>Len Wein (writer) and Dave Cockrum (artist and character designer). Storm joined the new team in <i>Giant-Size X-Men</i> #1.</p></section>
+                <section><h3>Powers &amp; skills</h3><p>She can influence weather patterns, summon wind, rain and lightning, alter temperature, and fly on currents she creates. Her control and judgment are as central to her strength as raw power.</p></section>
+                <section class="file-fact"><h3>Margin note</h3><p>Artist Dave Cockrum combined ideas from two earlier designs of his—Black Cat and Typhoon—when developing Storm's look. Her signature white hair was part of the design from the start.</p></section>
+                <section><h3>Start reading</h3><ul><li><i>Giant-Size X-Men</i> #1 (1975)</li><li>“Lifedeath,” <i>The Uncanny X-Men</i> #186 (1984)</li><li><i>Storm</i> (2024), by Murewa Ayodele and Lucas Werneck</li></ul></section>
+            </div></div>
+            <footer class="file-sources"><h3>Research trail</h3><a href="https://en.wikipedia.org/wiki/Storm_(Marvel_Comics)">Publication history &amp; cited references</a><a href="https://www.marvel.com/characters/storm">Marvel character profile</a><a href="https://www.comics.org/searchNew/?q=Giant-Size+X-Men+1&amp;search_object=issue&amp;method=icontains">Grand Comics Database issue records</a></footer>
+        </section>
+
+        <section class="character-file" id="file-deadpool" data-profile="deadpool" aria-labelledby="title-deadpool" hidden>
+            <header class="file-header file-header--red"><button class="back-to-index" type="button">← All dossiers</button><span>FILE 03 // CLASSIFIED? SURE.</span></header>
+            <div class="file-hero"><p class="file-kicker">Mercenary // Occasionally helpful</p><h2 id="title-deadpool">Deadpool</h2><p class="file-subtitle">Wade Wilson</p><p class="file-debut">First appearance <strong>The New Mutants #98 · 1990 (1991 cover date)</strong></p></div>
+            <div class="file-layout"><aside class="file-quote">This file has been reviewed by its subject. He added three footnotes.<span>— Unverified archivist</span></aside><div class="file-main">
+                <section><h3>Origin // Field notes</h3><p>Wade Wilson debuted as a masked mercenary sent after the New Mutants. Later stories connect his cancer treatment to the Weapon X program, which gave him a powerful healing factor and left him visibly scarred. His fourth-wall-breaking narration and erratic humor became part of his signature.</p></section>
+                <section class="file-credit"><h3>Creators // debut</h3><p>Fabian Nicieza (writer) and Rob Liefeld (artist and co-creator). <i>The New Mutants</i> #98 was cover-dated February 1991 and went on sale in December 1990.</p></section>
+                <section><h3>Powers &amp; skills</h3><p>Accelerated healing, high pain tolerance, expert sword and firearm use, and formidable improvisational combat skills. The healing factor does not make him invulnerable.</p></section>
+                <section class="file-fact"><h3>Margin note</h3><p>Rob Liefeld created the visual design; writer Fabian Nicieza named him and established much of his wisecracking voice. The name “Deadpool” came from a pool about who would die, not from an elaborate super-science acronym.</p></section>
+                <section><h3>Start reading</h3><ul><li><i>The New Mutants</i> #98 (1991 cover date)</li><li><i>Deadpool: The Circle Chase</i> #1–4 (1993)</li><li><i>Deadpool</i> (1997) #1 onward, by Joe Kelly and Ed McGuinness</li></ul></section>
+            </div></div>
+            <footer class="file-sources"><h3>Research trail</h3><a href="https://en.wikipedia.org/wiki/Deadpool">Publication history &amp; cited references</a><a href="https://www.marvel.com/characters/deadpool-wade-wilson">Marvel character profile</a><a href="https://www.comics.org/searchNew/?q=New+Mutants+98&amp;search_object=issue&amp;method=icontains">Grand Comics Database issue records</a></footer>
+        </section>
+
+        <section class="character-file" id="file-jean-grey" data-profile="jean-grey" aria-labelledby="title-jean-grey" hidden>
+            <header class="file-header file-header--green"><button class="back-to-index" type="button">← All dossiers</button><span>FILE 04 // PHOENIX</span></header>
+            <div class="file-hero"><p class="file-kicker">Founding X-Man // Phoenix</p><h2 id="title-jean-grey">Marvel Girl</h2><p class="file-subtitle">Jean Grey · Phoenix</p><p class="file-debut">First appearance <strong>The X-Men #1 · 1963</strong></p></div>
+            <div class="file-layout"><aside class="file-quote">A founding student whose story became cosmic in scale.<span>— Field archive</span></aside><div class="file-main">
+                <section><h3>Origin // Field notes</h3><p>Jean Grey was one of the original students recruited by Professor X and the first woman to join his X-Men. Initially known as Marvel Girl, her telekinetic abilities and later telepathy placed her at the center of the team's history. Her connection to the Phoenix Force drives one of the best-known X-Men sagas.</p></section>
+                <section class="file-credit"><h3>Creators // debut</h3><p>Stan Lee (writer) and Jack Kirby (artist and co-plotter). Jean first appeared as Marvel Girl in <i>The X-Men</i> #1.</p></section>
+                <section><h3>Powers &amp; abilities</h3><p>Powerful telepathy and telekinesis. Her relationship with the Phoenix Force has changed across different periods of Marvel continuity; it is a distinct cosmic story element, not a simple synonym for her mutant powers.</p></section>
+                <section class="file-fact"><h3>Margin note</h3><p>In the earliest X-Men stories, Jean's codename was Marvel Girl. “Phoenix” became part of her identity years later, after the team's spaceflight story.</p></section>
+                <section><h3>Start reading</h3><ul><li><i>The X-Men</i> #1 (1963)</li><li>“The Phoenix Saga,” <i>The Uncanny X-Men</i> #101–108 (1976–77)</li><li>“The Dark Phoenix Saga,” <i>The Uncanny X-Men</i> #129–137 (1980)</li></ul></section>
+            </div></div>
+            <footer class="file-sources"><h3>Research trail</h3><a href="https://en.wikipedia.org/wiki/Jean_Grey">Publication history &amp; cited references</a><a href="https://www.marvel.com/characters/jean-grey">Marvel character profile</a><a href="https://www.comics.org/searchNew/?q=X-Men+1+1963&amp;search_object=issue&amp;method=icontains">Grand Comics Database issue records</a></footer>
+        </section>
+
+        <section class="character-file" id="file-beast" data-profile="beast" aria-labelledby="title-beast" hidden>
+            <header class="file-header file-header--blue"><button class="back-to-index" type="button">← All dossiers</button><span>FILE 05 // LAB NOTES</span></header>
+            <div class="file-hero"><p class="file-kicker">Founding X-Man // Scientist</p><h2 id="title-beast">Beast</h2><p class="file-subtitle">Dr. Henry “Hank” McCoy</p><p class="file-debut">First appearance <strong>The X-Men #1 · 1963</strong></p></div>
+            <div class="file-layout"><aside class="file-quote">A brilliant mind with the agility to match.<span>— Field archive</span></aside><div class="file-main">
+                <section><h3>Origin // Field notes</h3><p>Hank McCoy was a founding X-Man whose extraordinary strength and agility appeared alongside a remarkable intellect. A gifted biochemist, he later experimented on himself to reverse a physical mutation; the procedure instead left him covered in blue fur. Across eras he has worked as a hero, teacher and scientist.</p></section>
+                <section class="file-credit"><h3>Creators // debut</h3><p>Stan Lee (writer) and Jack Kirby (artist and co-plotter). Beast debuted with the original team in <i>The X-Men</i> #1.</p></section>
+                <section><h3>Powers &amp; abilities</h3><p>Superhuman strength, speed, agility, balance and dexterity; enhanced senses; and a genius-level scientific intellect. The exact details of his physiology have shifted as his appearance changed over the decades.</p></section>
+                <section class="file-fact"><h3>Margin note</h3><p>Hank's furry blue appearance was not how he began: he first appeared with a human-looking body and unusually large hands and feet. His transformation unfolded in later comics.</p></section>
+                <section><h3>Start reading</h3><ul><li><i>The X-Men</i> #1 (1963)</li><li>Hank's transformation in <i>Amazing Adventures</i> #11–17 (1972)</li><li><i>Astonishing X-Men</i> (2004) #1 onward, by Joss Whedon and John Cassaday</li></ul></section>
+            </div></div>
+            <footer class="file-sources"><h3>Research trail</h3><a href="https://en.wikipedia.org/wiki/Beast_(Marvel_Comics)">Publication history &amp; cited references</a><a href="https://www.marvel.com/characters/beast-hank-mccoy">Marvel character profile</a><a href="https://www.comics.org/searchNew/?q=X-Men+1+1963&amp;search_object=issue&amp;method=icontains">Grand Comics Database issue records</a></footer>
+        </section>
+
+        <section class="character-file" id="file-cable" data-profile="cable" aria-labelledby="title-cable" hidden>
+            <header class="file-header file-header--gold"><button class="back-to-index" type="button">← All dossiers</button><span>FILE 06 // FUTURE FRONT</span></header>
+            <div class="file-hero"><p class="file-kicker">Soldier from tomorrow // X-Force</p><h2 id="title-cable">Cable</h2><p class="file-subtitle">Nathan Christopher Charles Summers</p><p class="file-debut">First teaser <strong>The New Mutants #86 · 1990</strong> <span>First full appearance: #87</span></p></div>
+            <div class="file-layout"><aside class="file-quote">“Forty-eight. I sent another one.”<span>— Cable, probably</span></aside><div class="file-main">
+                <section><h3>Origin // Field notes</h3><p>Cable was introduced as a grizzled future warrior and the new leader of the New Mutants. Later stories revealed him to be Nathan Summers, the son of Cyclops and Madelyne Pryor, sent into a future where he could survive a techno-organic virus. The character's backstory was deliberately revealed in pieces.</p></section>
+                <section class="file-credit"><h3>Creators // first full debut</h3><p>Louise Simonson (writer) and Rob Liefeld (artist and character designer). Cable appears as a teaser in <i>The New Mutants</i> #86 and makes his first full appearance in #87, both published in 1990.</p></section>
+                <section><h3>Powers &amp; skills</h3><p>Telepathy and telekinesis, commonly constrained by the effort required to contain his techno-organic infection. He is also a time traveler, strategist and heavily trained combatant, though his equipment and powers vary by era.</p></section>
+                <section class="file-fact"><h3>Margin note</h3><p>Cable did not arrive with his complete family history. Readers first met the mysterious adult soldier before the books established his connection to the Summers family.</p></section>
+                <section><h3>Start reading</h3><ul><li><i>The New Mutants</i> #86–87 (1990)</li><li>“X-Cutioner's Song,” X-books crossover (1992)</li><li><i>Cable &amp; Deadpool</i> #1 onward (2004)</li></ul></section>
+            </div></div>
+            <footer class="file-sources"><h3>Research trail</h3><a href="https://en.wikipedia.org/wiki/Cable_(character)">Publication history &amp; cited references</a><a href="https://www.marvel.com/characters/cable-nathan-summers">Marvel character profile</a><a href="https://www.comics.org/searchNew/?q=New+Mutants+87&amp;search_object=issue&amp;method=icontains">Grand Comics Database issue records</a></footer>
+        </section>
+
+        <section class="character-file" id="file-cyclops" data-profile="cyclops" aria-labelledby="title-cyclops" hidden>
+            <header class="file-header file-header--red"><button class="back-to-index" type="button">← All dossiers</button><span>FILE 07 // FIELD COMMAND</span></header>
+            <div class="file-hero"><p class="file-kicker">Founding X-Man // Team leader</p><h2 id="title-cyclops">Cyclops</h2><p class="file-subtitle">Scott Summers</p><p class="file-debut">First appearance <strong>The X-Men #1 · 1963</strong></p></div>
+            <div class="file-layout"><aside class="file-quote">The plan is the plan. Even when the plan changes.<span>— Field archive</span></aside><div class="file-main">
+                <section><h3>Origin // Field notes</h3><p>Scott Summers was the first student recruited by Professor X and became the original X-Men's field leader. His mutant optic blasts are powerful and continuous, so he relies on a specially engineered visor to control them. Discipline and tactical judgment become as recognizable as the red beam.</p></section>
+                <section class="file-credit"><h3>Creators // debut</h3><p>Stan Lee (writer) and Jack Kirby (artist and co-plotter). Scott Summers was part of the original lineup in <i>The X-Men</i> #1.</p></section>
+                <section><h3>Powers &amp; abilities</h3><p>His eyes emit concussive force beams. Ruby-quartz lenses and his visor regulate the blasts; they are not heat or laser vision. Scott is also a trained tactician and experienced team commander.</p></section>
+                <section class="file-fact"><h3>Margin note</h3><p>Cyclops and Beast were both introduced in the very first issue, but Scott was chosen as the field leader of the original team.</p></section>
+                <section><h3>Start reading</h3><ul><li><i>The X-Men</i> #1 (1963)</li><li><i>Giant-Size X-Men</i> #1 (1975)</li><li>“The Dark Phoenix Saga,” <i>The Uncanny X-Men</i> #129–137 (1980)</li></ul></section>
+            </div></div>
+            <footer class="file-sources"><h3>Research trail</h3><a href="https://en.wikipedia.org/wiki/Cyclops_(Marvel_Comics)">Publication history &amp; cited references</a><a href="https://www.marvel.com/characters/cyclops-scott-summers">Marvel character profile</a><a href="https://www.comics.org/searchNew/?q=X-Men+1+1963&amp;search_object=issue&amp;method=icontains">Grand Comics Database issue records</a></footer>
+        </section>
+
+        <section class="character-file" id="file-professor-x" data-profile="professor-x" aria-labelledby="title-professor-x" hidden>
+            <header class="file-header file-header--blue"><button class="back-to-index" type="button">← All dossiers</button><span>FILE 08 // CEREBRO</span></header>
+            <div class="file-hero"><p class="file-kicker">Founder // Telepath</p><h2 id="title-professor-x">Professor X</h2><p class="file-subtitle">Charles Francis Xavier</p><p class="file-debut">First appearance <strong>The X-Men #1 · 1963</strong></p></div>
+            <div class="file-layout"><aside class="file-quote">A school, a team, and a dream of coexistence.<span>— Field archive</span></aside><div class="file-main">
+                <section><h3>Origin // Field notes</h3><p>Charles Xavier is a powerful telepath and the founder of the X-Men and Xavier's School for Gifted Youngsters. He gathers young mutants to help them understand their abilities and to defend people who fear them. His longstanding ideological debate with Magneto asks how mutants can survive in a hostile world.</p></section>
+                <section class="file-credit"><h3>Creators // debut</h3><p>Stan Lee (writer) and Jack Kirby (artist and co-plotter). Professor X was introduced as the mentor of the original X-Men in issue #1.</p></section>
+                <section><h3>Powers &amp; abilities</h3><p>Extensive telepathy, including mind-to-mind communication and mental perception. Cerebro amplifies and focuses his ability. His intelligence and teaching shaped generations of mutant heroes.</p></section>
+                <section class="file-fact"><h3>Margin note</h3><p>In the original 1963 series, Xavier is introduced as the headmaster of the school and mentor of the first five X-Men. His long friendship and philosophical conflict with Magneto were developed later.</p></section>
+                <section><h3>Start reading</h3><ul><li><i>The X-Men</i> #1 (1963)</li><li><i>Marvel Graphic Novel</i> #5: <i>God Loves, Man Kills</i> (1982)</li><li><i>X-Men: Deadly Genesis</i> #1–6 (2005–06)</li></ul></section>
+            </div></div>
+            <footer class="file-sources"><h3>Research trail</h3><a href="https://en.wikipedia.org/wiki/Professor_X">Publication history &amp; cited references</a><a href="https://www.marvel.com/characters/professor-x-charles-xavier">Marvel character profile</a><a href="https://www.comics.org/searchNew/?q=X-Men+1+1963&amp;search_object=issue&amp;method=icontains">Grand Comics Database issue records</a></footer>
+        </section>
+
+        <section class="character-file" id="file-magneto" data-profile="magneto" aria-labelledby="title-magneto" hidden>
+            <header class="file-header file-header--red"><button class="back-to-index" type="button">← All dossiers</button><span>FILE 09 // POLARITY</span></header>
+            <div class="file-hero"><p class="file-kicker">Brotherhood // Sometimes ally</p><h2 id="title-magneto">Magneto</h2><p class="file-subtitle">Max Eisenhardt · also known as Erik Lehnsherr</p><p class="file-debut">First appearance <strong>The X-Men #1 · 1963</strong></p></div>
+            <div class="file-layout"><aside class="file-quote">Same fear. A different answer to it.<span>— Field archive</span></aside><div class="file-main">
+                <section><h3>Origin // Field notes</h3><p>Magneto is a mutant whose ability to control magnetism is matched by a history shaped by the Holocaust. His experiences underpin a conviction that mutants must protect themselves from human persecution. His methods put him at odds with Charles Xavier, although their relationship has shifted between enemy, ally and friend.</p></section>
+                <section class="file-credit"><h3>Creators // debut</h3><p>Stan Lee (writer) and Jack Kirby (artist and co-plotter). Magneto was the first major adversary faced by the X-Men in <i>The X-Men</i> #1.</p></section>
+                <section><h3>Powers &amp; abilities</h3><p>He can manipulate magnetic fields and metal, generate force fields, and influence electromagnetic phenomena. The extent of those powers varies with the story and the writer.</p></section>
+                <section class="file-fact"><h3>Margin note</h3><p>His civilian identity has been revised in comics over time. This file gives the currently familiar Max Eisenhardt name alongside Erik Lehnsherr, another widely used identity.</p></section>
+                <section><h3>Start reading</h3><ul><li><i>The X-Men</i> #1 (1963)</li><li><i>Marvel Graphic Novel</i> #5: <i>God Loves, Man Kills</i> (1982)</li><li><i>X-Men: Magneto Testament</i> #1–5 (2008–09)</li></ul></section>
+            </div></div>
+            <footer class="file-sources"><h3>Research trail</h3><a href="https://en.wikipedia.org/wiki/Magneto_(Marvel_Comics)">Publication history &amp; cited references</a><a href="https://www.marvel.com/characters/magneto-max-eisenhardt">Marvel character profile</a><a href="https://www.comics.org/searchNew/?q=X-Men+1+1963&amp;search_object=issue&amp;method=icontains">Grand Comics Database issue records</a></footer>
+        </section>
+
+        <section class="character-file" id="file-nightcrawler" data-profile="nightcrawler" aria-labelledby="title-nightcrawler" hidden>
+            <header class="file-header file-header--blue"><button class="back-to-index" type="button">← All dossiers</button><span>FILE 10 // BAMF</span></header>
+            <div class="file-hero"><p class="file-kicker">X-Man // Swashbuckler</p><h2 id="title-nightcrawler">Nightcrawler</h2><p class="file-subtitle">Kurt Wagner</p><p class="file-debut">First appearance <strong>Giant-Size X-Men #1 · 1975</strong></p></div>
+            <div class="file-layout"><aside class="file-quote">A teleporting acrobat with a showman's heart.<span>— Field archive</span></aside><div class="file-main">
+                <section><h3>Origin // Field notes</h3><p>Kurt Wagner is a German mutant with blue skin, pointed ears, a prehensile tail and the ability to teleport. Dave Cockrum created the design before joining Marvel; the character found his place among the international team in <i>Giant-Size X-Men</i> #1. His faith, humor and compassion are central to many portrayals.</p></section>
+                <section class="file-credit"><h3>Creators // team debut</h3><p>Len Wein (writer) and Dave Cockrum (artist and character designer). Nightcrawler joined the new team in <i>Giant-Size X-Men</i> #1.</p></section>
+                <section><h3>Powers &amp; abilities</h3><p>Short-range teleportation, exceptional agility and a prehensile tail. Teleportation leaves a cloud of sulfurous smoke and usually requires him to know or see his destination.</p></section>
+                <section class="file-fact"><h3>Margin note</h3><p>Cockrum first designed Nightcrawler for a different comic-book setting. After that project did not use the character, he brought the design with him to Marvel's new X-Men.</p></section>
+                <section><h3>Start reading</h3><ul><li><i>Giant-Size X-Men</i> #1 (1975)</li><li>“Days of Future Past,” <i>The Uncanny X-Men</i> #141–142 (1981)</li><li><i>Excalibur</i> #1 (1988)</li></ul></section>
+            </div></div>
+            <footer class="file-sources"><h3>Research trail</h3><a href="https://en.wikipedia.org/wiki/Nightcrawler_(character)">Publication history &amp; cited references</a><a href="https://www.marvel.com/characters/nightcrawler-kurt-wagner">Marvel character profile</a><a href="https://www.comics.org/searchNew/?q=Giant-Size+X-Men+1&amp;search_object=issue&amp;method=icontains">Grand Comics Database issue records</a></footer>
+        </section>
+
+        <section class="character-file" id="file-rogue" data-profile="rogue" aria-labelledby="title-rogue" hidden>
+            <header class="file-header file-header--green"><button class="back-to-index" type="button">← All dossiers</button><span>FILE 11 // NO SKIN CONTACT</span></header>
+            <div class="file-hero"><p class="file-kicker">X-Man // Southern belle</p><h2 id="title-rogue">Rogue</h2><p class="file-subtitle">Anna Marie · full birth name unrevealed</p><p class="file-debut">First appearance <strong>Avengers Annual #10 · 1981</strong></p></div>
+            <div class="file-layout"><aside class="file-quote">The hardest power to live with may be the one that keeps you apart.<span>— Field archive</span></aside><div class="file-main">
+                <section><h3>Origin // Field notes</h3><p>Rogue's mutant power emerged as a teenager: skin contact can absorb another person's memories, abilities and life energy. After an early encounter left Carol Danvers powerless for a time, Rogue sought help from the X-Men and joined the team. Her family name has deliberately remained unrevealed in mainstream comics.</p></section>
+                <section class="file-credit"><h3>Creators // debut</h3><p>Chris Claremont (writer) and Michael Golden (artist). Rogue's first appearance was in <i>Avengers Annual</i> #10.</p></section>
+                <section><h3>Powers &amp; abilities</h3><p>Absorbs memories, skills and powers through touch, usually temporarily, while the other person is weakened. Prolonged contact can be dangerous. Her long-running access to some of Carol Danvers' abilities has varied by era.</p></section>
+                <section class="file-fact"><h3>Margin note</h3><p>Rogue's first appearance was not in an X-Men issue: she debuted as an adversary in <i>Avengers Annual</i> #10 before joining the X-Men.</p></section>
+                <section><h3>Start reading</h3><ul><li><i>Avengers Annual</i> #10 (1981)</li><li><i>The Uncanny X-Men</i> #171 (1983)</li><li><i>Rogue &amp; Gambit</i> #1–5 (2018)</li></ul></section>
+            </div></div>
+            <footer class="file-sources"><h3>Research trail</h3><a href="https://en.wikipedia.org/wiki/Rogue_(Marvel_Comics)">Publication history &amp; cited references</a><a href="https://www.marvel.com/characters/rogue">Marvel character profile</a><a href="https://www.comics.org/searchNew/?q=Avengers+Annual+10&amp;search_object=issue&amp;method=icontains">Grand Comics Database issue records</a></footer>
+        </section>
+
+        <aside class="archive-method">
+            <h2>About the archive</h2>
+            <p>This is an unofficial fan-made guide. Character history and powers can change between comic eras; the files summarize a few major continuity touchpoints, not every retcon. Issue creators and publication details are linked to Marvel profiles and the Grand Comics Database; biography and publication-history links include cited references. No comic-cover art is reproduced here.</p>
+            <div class="archive-research-links"><a href="https://www.marvel.com/characters">Marvel character index</a><a href="https://www.comics.org/">Grand Comics Database</a><a href="https://www.britannica.com/topic/X-Men">Encyclopaedia Britannica: X-Men</a></div>
+        </aside>
+    </main>
+    <footer class="archive-footer"><span>MUTANTCOMMS // FAN ARCHIVE</span><a href="index.html">Return to MutantComms ↑</a></footer>
+</body>
+</html>
