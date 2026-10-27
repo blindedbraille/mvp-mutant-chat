@@ -2,8 +2,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const STORAGE_PREFIX = 'mutant-comms:';
   const PROFILE_META_KEY = `${STORAGE_PREFIX}profile:metadata`;
   const SPICY_MODE_KEY = `${STORAGE_PREFIX}settings:spicy`;
+  const DOOM_COOLDOWN_KEY = `${STORAGE_PREFIX}easter-egg:doom`;
+  const DOOM_COOLDOWN_MS = 5 * 60 * 1000;
   const AVATAR_DB_NAME = 'mutant-comms-profile';
   const REACTIONS = ['❤️', '😂', '👍', '😮', '😢', '❗'];
+  const REACTION_ICONS = {
+    '❤️': 'fa-heart',
+    '😂': 'fa-face-laugh',
+    '👍': 'fa-thumbs-up',
+    '😮': 'fa-face-surprise',
+    '😢': 'fa-face-sad-tear',
+    '❗': 'fa-circle-exclamation'
+  };
+  const REACTION_LABELS = {
+    '❤️': 'love',
+    '😂': 'laugh',
+    '👍': 'like',
+    '😮': 'surprise',
+    '😢': 'sad',
+    '❗': 'important'
+  };
   const MAX_MESSAGE_LENGTH = 1200;
   const MAX_AVATAR_FILE_SIZE = 8 * 1024 * 1024;
   const AVATAR_SIZE = 512;
@@ -14,7 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
     Wolverine: 'images/wolverine-pfp.webp',
     Storm: 'images/storm-pfp.jpg',
     Beast: 'images/beast-pfp.webp',
-    'Marvel Girl': 'images/marvel-girl-pfp.jpeg'
+    'Marvel Girl': 'images/marvel-girl-pfp.jpeg',
+    'Professor X': 'images/prof-x-pfp.avif'
   };
   const AVATAR_POSITIONS = {
     'Gold Squad': '50% 50%',
@@ -23,7 +42,106 @@ document.addEventListener('DOMContentLoaded', () => {
     Wolverine: '50% 28%',
     Storm: '50% 27%',
     Beast: '50% 43%',
-    'Marvel Girl': '50% 29%'
+    'Marvel Girl': '50% 29%',
+    'Professor X': '50% 32%'
+  };
+  const CHARACTER_PROFILES = {
+    'Gold Squad': {
+      fullName: 'X-Men Gold Squad',
+      codename: 'Gold Squad',
+      channel: 'X-616-GOLD',
+      biography: 'A close-knit field team coordinating missions and looking out for one another.',
+      powers: 'A team of specialists with a wide range of mutant abilities.',
+      team: 'X-Men',
+      status: '8 members on comms',
+      avatar: CHARACTER_AVATARS['Gold Squad']
+    },
+    Wolverine: {
+      fullName: 'James Howlett (Logan)',
+      codename: 'Wolverine',
+      channel: 'X-616-LOGAN',
+      biography: 'A veteran X-Man whose long life has taught him to trust actions over promises.',
+      powers: 'Accelerated healing, heightened senses, and retractable claws.',
+      team: 'X-Men',
+      status: 'Online',
+      avatar: CHARACTER_AVATARS.Wolverine
+    },
+    Deadpool: {
+      fullName: 'Wade Wilson',
+      codename: 'Deadpool',
+      channel: 'X-616-WADE',
+      biography: 'A mercenary with a sharp tongue, an unpredictable sense of humor, and a soft spot for his friends.',
+      powers: 'Accelerated healing and exceptional combat skills.',
+      team: 'Independent ally',
+      status: 'Online',
+      avatar: CHARACTER_AVATARS.Deadpool
+    },
+    Cable: {
+      fullName: 'Nathan Summers',
+      codename: 'Cable',
+      channel: 'X-616-NATHAN',
+      biography: 'A soldier from a possible future who plans carefully and protects his family.',
+      powers: 'Telepathy, telekinesis, and extensive tactical training.',
+      team: 'X-Men',
+      status: 'Online',
+      avatar: CHARACTER_AVATARS.Cable
+    },
+    Storm: {
+      fullName: 'Ororo Munroe',
+      codename: 'Storm',
+      channel: 'X-616-ORORO',
+      biography: 'A compassionate leader whose strength is matched by her care for others.',
+      powers: 'Weather manipulation, including wind, rain, and lightning.',
+      team: 'X-Men',
+      status: 'Online',
+      avatar: CHARACTER_AVATARS.Storm
+    },
+    Beast: {
+      fullName: 'Dr. Henry "Hank" McCoy',
+      codename: 'Beast',
+      channel: 'X-616-HANK',
+      biography: 'A brilliant scientist, teacher, and longtime member of the X-Men.',
+      powers: 'Enhanced strength, agility, and a remarkable intellect.',
+      team: 'X-Men',
+      status: 'On campus',
+      avatar: CHARACTER_AVATARS.Beast
+    },
+    'Marvel Girl': {
+      fullName: 'Jean Grey',
+      codename: 'Marvel Girl / Phoenix',
+      channel: 'X-616-JEAN',
+      biography: 'A thoughtful hero and devoted friend who continues to define herself on her own terms.',
+      powers: 'Telepathy and telekinesis.',
+      team: 'X-Men',
+      status: 'Online',
+      avatar: CHARACTER_AVATARS['Marvel Girl']
+    },
+    Cyclops: {
+      fullName: 'Scott Summers',
+      codename: 'Cyclops',
+      channel: 'X-616-SCOTT',
+      biography: 'A disciplined field leader who keeps the team focused under pressure.',
+      powers: 'Optic energy blasts, controlled by his ruby-quartz visor.',
+      team: 'X-Men',
+      status: 'On mission',
+      avatar: ''
+    },
+    'Professor X': {
+      fullName: 'Charles Xavier',
+      codename: 'Professor X',
+      channel: 'X-616-XAVIER',
+      biography: 'Founder of the X-Men and head of a school built to help young mutants thrive.',
+      powers: 'Powerful telepathy and the Cerebro detection system.',
+      team: 'X-Men / Xavier Institute',
+      status: 'Available',
+      avatar: CHARACTER_AVATARS['Professor X']
+    }
+  };
+  const CHARACTER_COLORS = {
+    'Professor X': '#445478',
+    Beast: '#315f54',
+    Cyclops: '#3158bf',
+    'Marvel Girl': '#963a57'
   };
   const PROFILE_VIBES = ['', 'Funny', 'Serious', 'Mysterious', 'Stylish', 'Chaotic'];
   const LEGACY_AUTHOR_NAMES = {
@@ -50,6 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
     vibe: ''
   }));
   let spicyMode = readStorage(SPICY_MODE_KEY, false) === true;
+  let doomCooldownUntil = 0;
 
   function readStorage(key, fallback) {
     try {
@@ -131,7 +250,8 @@ document.addEventListener('DOMContentLoaded', () => {
       Deadpool: '#9a2933',
       Storm: '#5661a7',
       Cable: '#53606d',
-      'Gold Squad': '#786631'
+      'Gold Squad': '#786631',
+      ...CHARACTER_COLORS
     };
     element.style.setProperty('--avatar-bg', avatarColors[isUser ? 'You' : name] || '#596579');
     element.style.setProperty('--avatar-position', isUser ? '50% 50%' : AVATAR_POSITIONS[name] || '50% 50%');
@@ -337,7 +457,10 @@ document.addEventListener('DOMContentLoaded', () => {
     dialog.setAttribute('aria-labelledby', 'welcome-dialog-title');
     dialog.setAttribute('aria-describedby', 'welcome-dialog-copy welcome-fan-note');
 
-    const eyebrow = createSettingsElement('p', 'welcome-eyebrow', 'Cerebro // Secure channel established');
+    const eyebrow = createSettingsElement('p', 'welcome-eyebrow');
+    const secureIcon = createSettingsElement('i', 'fa-solid fa-lock');
+    secureIcon.setAttribute('aria-hidden', 'true');
+    eyebrow.append(secureIcon, createSettingsElement('span', '', 'Cerebro // Secure channel established'));
     const title = createSettingsElement('h1', '', 'Welcome to MutantComms');
     title.id = 'welcome-dialog-title';
     const copy = createSettingsElement('p', 'welcome-dialog-copy',
@@ -434,6 +557,9 @@ document.addEventListener('DOMContentLoaded', () => {
       trigger = createSettingsElement('button', 'settings-button chat-settings-button');
       trigger.type = 'button';
       trigger.setAttribute('aria-label', 'Settings');
+      const icon = createSettingsElement('i', 'fa-solid fa-gear');
+      icon.setAttribute('aria-hidden', 'true');
+      trigger.append(icon);
       const info = shell.querySelector('.info-button');
       if (info) info.before(trigger);
       else shell.querySelector('.chat-header-row')?.append(trigger);
@@ -446,9 +572,12 @@ document.addEventListener('DOMContentLoaded', () => {
     panel.setAttribute('aria-live', 'polite');
 
     const heading = createSettingsElement('h2', '', 'Settings');
-    const close = createSettingsElement('button', 'settings-close', '×');
+    const close = createSettingsElement('button', 'settings-close');
     close.type = 'button';
     close.setAttribute('aria-label', 'Close settings');
+    const closeIcon = createSettingsElement('i', 'fa-solid fa-xmark');
+    closeIcon.setAttribute('aria-hidden', 'true');
+    close.append(closeIcon);
     const about = createSettingsElement('button', 'settings-about', 'About MutantComms');
     about.type = 'button';
     const titleRow = createSettingsElement('div', 'settings-title-row');
@@ -501,7 +630,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const spicyLabel = createSettingsElement('label', 'settings-toggle-label');
     const spicy = createSettingsElement('input', 'spicy-mode-toggle');
     spicy.type = 'checkbox';
-    spicyLabel.append(spicy, createSettingsElement('span', '', 'Spicy Mode'));
+    spicyLabel.append(spicy, createSettingsElement('span', '', '🌶️ Spicy Mode'));
 
     const actions = createSettingsElement('div', 'settings-actions');
     const save = createSettingsElement('button', 'settings-save', 'Save profile');
@@ -786,23 +915,81 @@ document.addEventListener('DOMContentLoaded', () => {
     const panel = document.querySelector('.info-panel');
     if (!button || !panel) return;
 
+    const members = [...panel.querySelectorAll('li')]
+      .map((member) => member.textContent.trim())
+      .filter(Boolean);
+    const profile = CHARACTER_PROFILES[pageTitle] || CHARACTER_PROFILES['Gold Squad'];
+    const headingId = 'character-info-heading';
+    const closeButton = createSettingsElement('button', 'info-panel-close');
+    closeButton.type = 'button';
+    closeButton.setAttribute('aria-label', 'Close character information');
+    const closeIcon = createSettingsElement('i', 'fa-solid fa-xmark');
+    closeIcon.setAttribute('aria-hidden', 'true');
+    closeButton.append(closeIcon);
+
+    const titleRow = createSettingsElement('div', 'info-panel-title-row');
+    const title = createSettingsElement('h2', '', 'Comms Profile');
+    title.id = headingId;
+    titleRow.append(title, closeButton);
+
+    const identity = createSettingsElement('div', 'info-profile-identity');
+    const portrait = createSettingsElement('img', 'info-profile-avatar');
+    portrait.src = profile.avatar;
+    portrait.alt = `${profile.codename} profile picture`;
+    portrait.addEventListener('error', () => portrait.remove(), { once: true });
+    const codename = createSettingsElement('p', 'info-profile-codename', profile.codename);
+    const fullName = createSettingsElement('h3', 'info-profile-name', profile.fullName);
+    identity.append(portrait, codename, fullName);
+
+    const details = createSettingsElement('dl', 'info-profile-details');
+    [
+      ['Fictional comms line', profile.channel],
+      ['Status', profile.status],
+      ['Team', profile.team],
+      ['Abilities', profile.powers]
+    ].forEach(([label, value]) => {
+      details.append(
+        createSettingsElement('dt', '', label),
+        createSettingsElement('dd', '', value)
+      );
+    });
+    const biography = createSettingsElement('p', 'info-profile-biography', profile.biography);
+    panel.replaceChildren(titleRow, identity, details, biography);
+    panel.setAttribute('role', 'dialog');
+    panel.setAttribute('aria-labelledby', headingId);
+    panel.setAttribute('aria-hidden', 'true');
+
+    if (conversation === 'gold-squad') {
+      const memberList = createSettingsElement('ul', 'info-profile-members');
+      members.forEach((member) => memberList.append(createSettingsElement('li', '', member)));
+      const memberSection = createSettingsElement('section', 'info-profile-member-section');
+      memberSection.append(createSettingsElement('h3', '', 'Team roster'), memberList);
+      panel.append(memberSection);
+    }
+
     button.setAttribute('aria-expanded', 'false');
-    const close = () => {
+    const close = (restoreFocus = false) => {
       panel.classList.remove('visible');
+      panel.setAttribute('aria-hidden', 'true');
       button.setAttribute('aria-expanded', 'false');
+      if (restoreFocus) button.focus();
     };
 
     button.addEventListener('click', () => {
       const isVisible = panel.classList.toggle('visible');
+      panel.setAttribute('aria-hidden', String(!isVisible));
       button.setAttribute('aria-expanded', String(isVisible));
+      if (isVisible) closeButton.focus();
     });
+    closeButton.addEventListener('click', () => close(true));
 
     document.addEventListener('click', (event) => {
-      if (!panel.contains(event.target) && !button.contains(event.target)) close();
+      if (panel.classList.contains('visible') &&
+          !panel.contains(event.target) && !button.contains(event.target)) close();
     });
 
     document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') close();
+      if (event.key === 'Escape' && panel.classList.contains('visible')) close(true);
     });
   }
 
@@ -837,16 +1024,147 @@ document.addEventListener('DOMContentLoaded', () => {
     const anchor = createSettingsElement('a', 'archive-quick-link');
     anchor.href = 'field-archive.html';
     anchor.setAttribute('aria-label', 'Open the X-Men Field Archive');
-    const icon = createSettingsElement('span', 'archive-quick-icon', '▤');
+    const icon = createSettingsElement('i', 'archive-quick-icon fa-solid fa-book-open');
     icon.setAttribute('aria-hidden', 'true');
-    anchor.append(icon, createSettingsElement('span', '', 'Archive'));
+    const label = createSettingsElement('span', 'visually-hidden', 'Archive');
+    anchor.append(icon, label);
 
     const messengerHeader = document.querySelector('.messenger-header');
-    const topbar = document.querySelector('.chat-topbar');
     const settings = document.querySelector('.messenger-header .settings-button');
-    const phoneStatus = topbar?.querySelector('.phone-status');
-    if (messengerHeader && settings) messengerHeader.insertBefore(anchor, settings);
-    else if (topbar && phoneStatus) topbar.insertBefore(anchor, phoneStatus);
+    if (messengerHeader && settings) {
+      const actions = createSettingsElement('div', 'messenger-actions');
+      messengerHeader.insertBefore(actions, settings);
+      actions.append(anchor, settings);
+      return;
+    }
+
+    const chatHeader = document.querySelector('.chat-header-row');
+    const chatSettings = chatHeader?.querySelector('.settings-button');
+    const info = chatHeader?.querySelector('.info-button');
+    if (chatHeader && chatSettings && info) {
+      const actions = createSettingsElement('div', 'chat-header-actions');
+      chatHeader.insertBefore(actions, chatSettings);
+      actions.append(anchor, chatSettings, info);
+    }
+  }
+
+  function initializeTipsPanel() {
+    const shell = document.querySelector('.phone-shell');
+    const actions = document.querySelector('.messenger-actions, .chat-header-actions');
+    if (!shell || !actions) return;
+
+    const trigger = createSettingsElement('button', 'tips-button');
+    trigger.type = 'button';
+    trigger.setAttribute('aria-label', 'Tips & Tricks');
+    trigger.title = 'Tips & Tricks';
+    trigger.setAttribute('aria-expanded', 'false');
+    const icon = createSettingsElement('i', 'fa-solid fa-lightbulb');
+    icon.setAttribute('aria-hidden', 'true');
+    trigger.append(icon);
+    trigger.setAttribute('aria-controls', 'mutant-comms-tips');
+    actions.insertBefore(trigger, actions.querySelector('.archive-quick-link') ||
+      actions.querySelector('.settings-button'));
+
+    const panel = createSettingsElement('aside', 'tips-panel');
+    panel.id = 'mutant-comms-tips';
+    panel.hidden = true;
+    panel.setAttribute('role', 'dialog');
+    panel.setAttribute('aria-labelledby', 'mutant-comms-tips-heading');
+    panel.setAttribute('aria-hidden', 'true');
+
+    const close = createSettingsElement('button', 'tips-close');
+    close.type = 'button';
+    close.setAttribute('aria-label', 'Close Tips & Tricks');
+    const closeIcon = createSettingsElement('i', 'fa-solid fa-xmark');
+    closeIcon.setAttribute('aria-hidden', 'true');
+    close.append(closeIcon);
+
+    const heading = createSettingsElement('h2', '', 'Tips & Tricks');
+    heading.id = 'mutant-comms-tips-heading';
+    const titleRow = createSettingsElement('div', 'tips-title-row');
+    titleRow.append(heading, close);
+    const description = createSettingsElement('p', 'tips-description',
+      'Tap a prompt to fill the message composer. Press Send when you are ready.');
+    panel.append(titleRow, description);
+
+    const categories = [
+      ['Getting to Know the X-Men', [
+        "What's your favourite food?",
+        'What do you do for fun?',
+        "Who's your favourite X-Man?",
+        "What's your biggest fear?"
+      ]],
+      ['Marvel Universe', [
+        'What do you think of Spider-Man?',
+        'Do you know Captain America?',
+        'What do you think of the Avengers?',
+        'What do you think of Doctor Doom?',
+        'Who would win, Hulk or Wolverine?'
+      ]],
+      ['Funny and Personal Questions', [
+        'Do you have a crush on anyone?',
+        "What's your most embarrassing moment?",
+        'Can you tell me a joke?',
+        'What do you think of Deadpool?',
+        'Can I join the X-Men?'
+      ]]
+    ];
+
+    categories.forEach(([category, prompts]) => {
+      const section = createSettingsElement('section', 'tips-category');
+      const categoryHeading = createSettingsElement('h3', '', category);
+      const list = createSettingsElement('div', 'tips-prompt-list');
+      prompts.forEach((prompt) => {
+        const suggestion = createSettingsElement('button', 'tips-prompt', prompt);
+        suggestion.type = 'button';
+        suggestion.addEventListener('click', () => {
+          const input = shell.querySelector('.message-composer input');
+          if (!input) {
+            window.location.href = `group-chat.html?prompt=${encodeURIComponent(prompt)}`;
+            return;
+          }
+          input.value = prompt;
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+          closePanel(true);
+          input.focus();
+        });
+        list.append(suggestion);
+      });
+      section.append(categoryHeading, list);
+      panel.append(section);
+    });
+
+    const secrets = createSettingsElement('section', 'tips-category');
+    secrets.append(
+      createSettingsElement('h3', '', 'Secrets and Easter Eggs'),
+      createSettingsElement('p', 'tips-hint',
+        'Try an unusual question, then follow up with “Why?” A small detail in one reply may lead somewhere unexpected.')
+    );
+    panel.append(secrets);
+
+    shell.append(panel);
+    const closePanel = (restoreFocus = false) => {
+      panel.hidden = true;
+      panel.setAttribute('aria-hidden', 'true');
+      trigger.setAttribute('aria-expanded', 'false');
+      if (restoreFocus) trigger.focus();
+    };
+
+    trigger.addEventListener('click', () => {
+      panel.hidden = !panel.hidden;
+      panel.setAttribute('aria-hidden', String(panel.hidden));
+      trigger.setAttribute('aria-expanded', String(!panel.hidden));
+      if (!panel.hidden) close.focus();
+    });
+    close.addEventListener('click', () => closePanel(true));
+    document.addEventListener('click', (event) => {
+      if (!panel.hidden && !panel.contains(event.target) && !trigger.contains(event.target)) {
+        closePanel();
+      }
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !panel.hidden) closePanel(true);
+    });
   }
 
   function initializeConversationPreviews() {
@@ -1241,6 +1559,46 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function maybeTriggerDoctorDoom(text, messages, nearBottom) {
+    if (!/\b(?:doctor\s+doom|dr\.?\s+doom|victor\s+von\s+doom|doom)\b/i.test(text)) return;
+    const now = Date.now();
+    const savedTrigger = readStorage(DOOM_COOLDOWN_KEY, 0);
+    if (typeof savedTrigger !== 'number' || !Number.isFinite(savedTrigger) || savedTrigger < 0) {
+      console.error('MutantComms found an invalid Doctor Doom event cooldown.');
+    } else if (now - savedTrigger < DOOM_COOLDOWN_MS || now < doomCooldownUntil) {
+      return;
+    }
+    if (Math.random() >= 0.18) return;
+
+    doomCooldownUntil = now + DOOM_COOLDOWN_MS;
+    writeStorage(DOOM_COOLDOWN_KEY, now);
+    const notice = createSettingsElement('div', 'doom-notice', 'DOOM HAS ENTERED THE CHAT');
+    notice.setAttribute('role', 'status');
+    notice.setAttribute('aria-live', 'polite');
+    phone.append(notice);
+    phone.classList.add('doom-glitch');
+    window.setTimeout(() => {
+      phone.classList.remove('doom-glitch');
+      notice.remove();
+    }, 2800);
+
+    const responses = [
+      'Doom does not require your approval.',
+      'Your conversation has been deemed unworthy of Doom’s attention.'
+    ];
+    const timestamp = Date.now();
+    const record = {
+      id: `doom-${window.crypto?.randomUUID?.() || `${timestamp.toString(36)}-${Math.random().toString(36).slice(2)}`}`,
+      author: 'Doctor Doom',
+      text: responses[Math.floor(Math.random() * responses.length)],
+      time: formatTime(new Date(timestamp)),
+      timestamp
+    };
+    messages.insertBefore(createMessageGroup(record), messages.querySelector('.typing-row'));
+    persistMessage(record);
+    if (nearBottom) messages.scrollTop = messages.scrollHeight;
+  }
+
   function initializeMessageComposer(typing) {
     const form = document.querySelector('.message-composer');
     const input = form?.querySelector('input');
@@ -1249,8 +1607,20 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!form || !input || !messages || !sendButton) return;
 
     const draftKey = `${STORAGE_PREFIX}draft:${conversation}`;
-    const savedDraft = readStorage(draftKey, '');
-    if (typeof savedDraft === 'string') input.value = savedDraft;
+    const prompt = new URLSearchParams(window.location.search).get('prompt');
+    if (prompt !== null) {
+      if (prompt.length <= MAX_MESSAGE_LENGTH) {
+        input.value = prompt;
+        const url = new URL(window.location.href);
+        url.searchParams.delete('prompt');
+        window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
+      } else {
+        console.error('MutantComms ignored a suggested prompt that exceeds the message limit.');
+      }
+    } else {
+      const savedDraft = readStorage(draftKey, '');
+      if (typeof savedDraft === 'string') input.value = savedDraft;
+    }
 
     let pendingResponse = false;
     const updateComposer = () => {
@@ -1325,6 +1695,7 @@ document.addEventListener('DOMContentLoaded', () => {
           window.mutantCommsAddCharacterReaction(record.id, response.reaction);
         }
         maybePublishAvatarReaction();
+        maybeTriggerDoctorDoom(text, messages, nearBottom);
       } catch (error) {
         console.error('MutantComms local response handler failed.', error);
       } finally {
@@ -1530,8 +1901,10 @@ document.addEventListener('DOMContentLoaded', () => {
   function getReactionCounts(group) {
     const counts = {};
     group.querySelectorAll('.reaction-badge').forEach((badge) => {
-      const symbol = badge.querySelector('.reaction-symbol')?.textContent || '';
-      const count = Number.parseInt(badge.textContent.replace(symbol, '').trim(), 10) || 0;
+      const symbol = badge.querySelector('.reaction-symbol')?.dataset.reaction
+        || badge.dataset.reaction
+        || '';
+      const count = Number.parseInt(badge.textContent.trim(), 10) || 0;
       if (symbol && count > 0) counts[symbol] = (counts[symbol] || 0) + count;
     });
     return counts;
@@ -1545,10 +1918,15 @@ document.addEventListener('DOMContentLoaded', () => {
       if (count <= 0) return;
       const badge = document.createElement('div');
       badge.className = 'reaction-badge';
+      badge.dataset.reaction = emoji;
       if (emoji === selectedEmoji) badge.classList.add('reaction-bounce');
       const symbol = document.createElement('span');
       symbol.className = 'reaction-symbol';
-      symbol.textContent = emoji;
+      symbol.dataset.reaction = emoji;
+      const icon = document.createElement('i');
+      icon.className = `fa-solid ${REACTION_ICONS[emoji]}`;
+      icon.setAttribute('aria-hidden', 'true');
+      symbol.append(icon);
       badge.append(symbol, document.createTextNode(String(count)));
       content.append(badge);
     });
@@ -1574,8 +1952,11 @@ document.addEventListener('DOMContentLoaded', () => {
       option.type = 'button';
       option.className = 'reaction-option';
       option.dataset.reaction = emoji;
-      option.setAttribute('aria-label', `React ${emoji}`);
-      option.textContent = emoji;
+      option.setAttribute('aria-label', `React ${REACTION_LABELS[emoji]}`);
+      const icon = document.createElement('i');
+      icon.className = `fa-solid ${REACTION_ICONS[emoji]}`;
+      icon.setAttribute('aria-hidden', 'true');
+      option.append(icon);
       menu.append(option);
     });
     shell.append(menu);
@@ -1724,6 +2105,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const openWelcomeExperience = initializeWelcomeExperience();
   createSettingsPanel();
   initializeArchiveAccess();
+  initializeTipsPanel();
   decorateVisibleAvatars();
   initializeNetworkIndicator();
   initializeInfoPanel();

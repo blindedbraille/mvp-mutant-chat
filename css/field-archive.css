@@ -6,6 +6,40 @@
   color: #f4f4f7;
 }
 
+@media (min-width: 721px) {
+  .archive-page {
+    background:
+      radial-gradient(circle, rgba(245, 211, 31, 0.075) 1px, transparent 1.5px) 0 0 / 12px 12px,
+      linear-gradient(rgba(7, 10, 18, 0.66), rgba(7, 10, 18, 0.82)),
+      url("../images/Desktop-Background.png") center / cover fixed no-repeat;
+  }
+}
+
+.archive-wordmark,
+.archive-return,
+.cover-topline,
+.cover-footer,
+.cover-kicker,
+.archive-kicker,
+.file-kicker,
+.dossier-number,
+.dossier-glyph,
+.dossier-name,
+.dossier-open,
+.file-header,
+.profile-pager button,
+.archive-footer a {
+  font-family: var(--font-display);
+}
+
+.archive-return i {
+  margin-right: 0.35em;
+}
+
+.dossier-open i {
+  margin-left: 0.35em;
+}
+
 .archive-masthead,
 .archive-footer {
   display: flex;
@@ -203,17 +237,18 @@
   transform: rotate(3deg);
 }
 
-.cover-x {
-  color: #f5d31f;
-  font-size: clamp(10rem, 26vw, 17rem);
-  font-weight: 1000;
-  line-height: 0.75;
-  text-shadow: 8px 8px 0 #244bc1, 14px 15px 0 rgba(0, 0, 0, 0.55);
-  transform: rotate(-12deg);
+.cover-team-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 26%;
 }
 
 .cover-art-caption {
   position: absolute;
+  z-index: 1;
   right: 12px;
   bottom: 10px;
   color: #d5d9e2;
@@ -306,6 +341,7 @@
 
 .dossier-card {
   position: relative;
+  isolation: isolate;
   display: flex;
   min-height: 180px;
   flex-direction: column;
@@ -326,6 +362,7 @@
 .dossier-card::after {
   content: "";
   position: absolute;
+  z-index: 1;
   top: -28px;
   right: -33px;
   width: 112px;
@@ -333,6 +370,25 @@
   transform: rotate(19deg);
   border: 1px solid rgba(255, 255, 255, 0.16);
   background: linear-gradient(145deg, rgba(255, 255, 255, 0.14), transparent);
+}
+
+.dossier-card::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(8, 12, 20, 0.94), rgba(8, 12, 20, 0.28) 78%);
+  pointer-events: none;
+}
+
+.dossier-art {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.72;
 }
 
 .dossier-card:hover,
@@ -359,7 +415,7 @@
 .dossier-identity,
 .dossier-open {
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
 .dossier-number {
@@ -452,6 +508,9 @@
 
 .back-to-index,
 .profile-pager button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
   padding: 7px 10px;
   border: 1px solid #44516b;
   border-radius: 6px;
@@ -474,7 +533,8 @@
 .file-hero {
   position: relative;
   overflow: hidden;
-  padding: clamp(24px, 5vw, 48px);
+  min-height: 270px;
+  padding: clamp(24px, 5vw, 48px) clamp(170px, 30%, 300px) clamp(24px, 5vw, 48px) clamp(24px, 5vw, 48px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   background:
     linear-gradient(112deg, rgba(36, 75, 193, 0.6), transparent 78%),
@@ -485,7 +545,7 @@
   content: attr(data-mark);
   position: absolute;
   top: 50%;
-  right: 6%;
+  right: clamp(150px, 28%, 280px);
   transform: translateY(-50%) rotate(-9deg);
   color: rgba(245, 211, 31, 0.14);
   font-size: clamp(4rem, 15vw, 10rem);
@@ -501,9 +561,22 @@
   color: #f5d31f;
 }
 
+.file-portrait {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  right: clamp(16px, 4vw, 38px);
+  width: clamp(120px, 24%, 220px);
+  height: clamp(160px, 22vw, 220px);
+  transform: translateY(-50%);
+  border: 2px solid rgba(245, 211, 31, 0.8);
+  box-shadow: 8px 9px 0 rgba(0, 0, 0, 0.32);
+  object-fit: cover;
+}
+
 .file-hero h2 {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   margin: 0;
   color: #fff;
   font-size: clamp(2.4rem, 8vw, 4.4rem);
@@ -517,7 +590,7 @@
 .file-subtitle,
 .file-debut {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   color: #d5d9e2;
 }
 
@@ -726,6 +799,21 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
+  .file-hero {
+    min-height: 240px;
+    padding-right: 155px;
+  }
+
+  .file-portrait {
+    right: 14px;
+    width: 122px;
+    height: 168px;
+  }
+
+  .file-hero::after {
+    right: 138px;
+  }
+
   .file-quote {
     max-width: 300px;
   }
@@ -761,6 +849,21 @@
   .cover-grid {
     grid-template-columns: minmax(0, 1fr);
     min-height: 0;
+  }
+
+  .file-hero {
+    min-height: 220px;
+    padding: 22px 132px 22px 18px;
+  }
+
+  .file-portrait {
+    right: 10px;
+    width: 104px;
+    height: 142px;
+  }
+
+  .file-hero::after {
+    right: 115px;
   }
 
   .cover-copy {
@@ -862,5 +965,17 @@
 
   .dossier-card {
     transition-duration: 0.01ms;
+  }
+}
+
+@media (min-width: 721px) {
+  .archive-page {
+    background-image:
+      radial-gradient(circle, rgba(245, 211, 31, 0.075) 1px, transparent 1.5px),
+      linear-gradient(155deg, rgba(23, 29, 40, 0.9), rgba(9, 11, 16, 0.86)),
+      url("../images/Desktop-Background.png");
+    background-position: 0 0, center, center;
+    background-size: 12px 12px, cover, cover;
+    background-attachment: fixed;
   }
 }

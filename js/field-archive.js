@@ -7,9 +7,56 @@ document.addEventListener('DOMContentLoaded', () => {
   const empty = document.querySelector('.archive-empty');
   if (!cover || !index || !files.length || !dossiers.length || !search || !empty) return;
 
+  const artwork = {
+    wolverine: ['wolverine-pfp.webp', 'center 24%'],
+    storm: ['storm-pfp.jpg', 'center 27%'],
+    deadpool: ['deadpool-pfp.jpg', 'center 35%'],
+    'jean-grey': ['marvel-girl-pfp.jpeg', 'center 24%'],
+    beast: ['beast-pfp.webp', 'center 25%'],
+    cable: ['cable-pfp.jpg', 'center 38%'],
+    cyclops: ['cyclops-pfp.webp', 'center 48%'],
+    'professor-x': ['prof-x-pfp.avif', 'center 18%'],
+    magneto: ['magneto-pfp.webp', 'center 34%'],
+    nightcrawler: ['nightcrawler-pfp.webp', 'center 35%'],
+    rogue: ['rogue-pfp.webp', 'center 48%']
+  };
   const profileIds = files.map((file) => file.dataset.profile);
   const fileById = new Map(files.map((file) => [file.dataset.profile, file]));
   const title = 'X-Men Field Archive';
+
+  dossiers.forEach((card) => {
+    const profileId = card.dataset.openProfile;
+    const imageData = artwork[profileId];
+    if (!imageData) {
+      console.error(`MutantComms has no archive artwork for "${profileId}".`);
+      return;
+    }
+    const image = document.createElement('img');
+    image.className = 'dossier-art';
+    image.src = `images/${imageData[0]}`;
+    image.alt = '';
+    image.loading = 'lazy';
+    image.style.objectPosition = imageData[1];
+    card.prepend(image);
+  });
+
+  files.forEach((file) => {
+    const profileId = file.dataset.profile;
+    const imageData = artwork[profileId];
+    const hero = file.querySelector('.file-hero');
+    const name = hero?.querySelector('h2')?.textContent.trim();
+    if (!imageData || !hero || !name) {
+      console.error(`MutantComms could not create the archive portrait for "${profileId}".`);
+      return;
+    }
+    const image = document.createElement('img');
+    image.className = 'file-portrait';
+    image.src = `images/${imageData[0]}`;
+    image.alt = `${name} comic artwork`;
+    image.loading = 'lazy';
+    image.style.objectPosition = imageData[1];
+    hero.prepend(image);
+  });
 
   function renderRoute(moveFocus = false) {
     const profileId = window.location.hash.slice(1);
@@ -17,6 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
     cover.hidden = Boolean(activeFile);
     index.hidden = Boolean(activeFile);
     files.forEach((file) => { file.hidden = file !== activeFile; });
+    const portrait = activeFile?.querySelector('.file-portrait');
+    if (portrait) portrait.loading = 'eager';
     document.title = activeFile
       ? `${activeFile.querySelector('.file-hero h2')?.textContent || 'Character file'} - X-Men Field Archive`
       : `${title} - MutantComms`;
@@ -54,12 +103,18 @@ document.addEventListener('DOMContentLoaded', () => {
     pager.className = 'profile-pager';
     pager.setAttribute('aria-label', 'Character file navigation');
     [
-      [profileIds[(indexInList - 1 + profileIds.length) % profileIds.length], '← Previous file'],
-      [profileIds[(indexInList + 1) % profileIds.length], 'Next file →']
-    ].forEach(([profileId, label]) => {
+      [profileIds[(indexInList - 1 + profileIds.length) % profileIds.length], 'Previous file', 'fa-arrow-left'],
+      [profileIds[(indexInList + 1) % profileIds.length], 'Next file', 'fa-arrow-right']
+    ].forEach(([profileId, label, iconName], index) => {
       const button = document.createElement('button');
       button.type = 'button';
-      button.textContent = label;
+      const icon = document.createElement('i');
+      icon.className = `fa-solid ${iconName}`;
+      icon.setAttribute('aria-hidden', 'true');
+      const text = document.createElement('span');
+      text.textContent = label;
+      if (index === 0) button.append(icon, text);
+      else button.append(text, icon);
       button.addEventListener('click', () => visit(profileId));
       pager.append(button);
     });

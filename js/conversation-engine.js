@@ -1,7 +1,7 @@
 window.MutantCommsConversationEngine = (() => {
   const STORAGE_PREFIX = 'mutant-comms:memory:';
   const dialogue = window.MutantCommsDialogue;
-  const characters = ['Wolverine', 'Deadpool', 'Storm', 'Cable'];
+  const characters = ['Wolverine', 'Deadpool', 'Storm', 'Cable', 'Beast', 'Marvel Girl', 'Professor X', 'Cyclops'];
   const relatedTopics = {
     xavier: ['mansion', 'discrimination'],
     magneto: ['brotherhood', 'discrimination'],
@@ -39,14 +39,47 @@ window.MutantCommsConversationEngine = (() => {
     summers: 'Cable',
     cyclops: 'Cyclops',
     scott: 'Cyclops',
-    jean: 'Jean Grey',
+    jean: 'Marvel Girl',
+    'jean grey': 'Marvel Girl',
+    'marvel girl': 'Marvel Girl',
     magneto: 'Magneto',
     erik: 'Magneto',
     xavier: 'Professor X',
     charles: 'Professor X',
     beast: 'Beast',
     hank: 'Beast',
-    mystique: 'Mystique'
+    mystique: 'Mystique',
+    'spider-man': 'Spider-Man',
+    'spider man': 'Spider-Man',
+    spiderman: 'Spider-Man',
+    peter: 'Spider-Man',
+    parker: 'Spider-Man',
+    'captain america': 'Captain America',
+    cap: 'Captain America',
+    'steve rogers': 'Captain America',
+    rogers: 'Captain America',
+    thor: 'Thor',
+    hulk: 'Hulk',
+    'bruce banner': 'Hulk',
+    banner: 'Hulk',
+    'black widow': 'Black Widow',
+    'natasha romanoff': 'Black Widow',
+    natasha: 'Black Widow',
+    'iron man': 'Iron Man',
+    'tony stark': 'Iron Man',
+    stark: 'Iron Man',
+    'fantastic four': 'Fantastic Four',
+    'reed richards': 'Fantastic Four',
+    'sue storm': 'Fantastic Four',
+    'johnny storm': 'Fantastic Four',
+    'ben grimm': 'Fantastic Four',
+    avengers: 'Avengers',
+    'doctor doom': 'Doctor Doom',
+    'dr doom': 'Doctor Doom',
+    doom: 'Doctor Doom',
+    'victor von doom': 'Doctor Doom',
+    'doctor doom': 'Doctor Doom',
+    'dr. doom': 'Doctor Doom'
   };
   const topicEntries = Object.entries(dialogue.topics);
   const intentRules = [
@@ -331,7 +364,13 @@ window.MutantCommsConversationEngine = (() => {
     if (analysis.unusual && memory.unusualStreak >= 3) {
       return getFallback(character, memory, analysis);
     }
-    if (topic && (!intent || ['lore', 'question', 'relationship', 'gossip'].includes(intent))) {
+    if (topic === 'marvelCharacters') {
+      const mentioned = analysis.entities.find((name) =>
+        dialogue.marvelOpinions?.[name]?.[character]);
+      const opinions = mentioned ? dialogue.marvelOpinions[mentioned][character] : [];
+      if (opinions.length) response = choose(opinions, memory, `${character}:${mentioned}`);
+    }
+    if (!response && topic && (!intent || ['lore', 'question', 'relationship', 'gossip'].includes(intent))) {
       const topicLines = dialogue.topics[topic]?.responses[character] || [];
       if (topicLines.length) response = choose(topicLines, memory, `${character}:${topic}`);
     }

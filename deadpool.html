@@ -5,6 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Deadpool - MutantComms</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <script src="js/dialogue.js" defer></script>
     <script src="js/conversation-engine.js" defer></script>
@@ -19,32 +23,33 @@
             <a class="desktop-caption" href="field-archive.html">
                 <span>FIELD LOG // 01</span>
                 <strong>X-Men Field Archive</strong>
-                <p>Flip through mutant origins, powers, creators and essential comics. Open the archive <span aria-hidden="true">→</span></p>
+                <p>Flip through mutant origins, powers, creators and essential comics. Open the archive <i class="fa-solid fa-book-open" aria-hidden="true"></i></p>
             </a>
 
             <section class="phone-shell" aria-label="MutantComms Deadpool chat" data-conversation-id="deadpool">
                 <header class="chat-topbar">
                     <div class="connection-status">
+                        <i class="fa-solid fa-satellite-dish" aria-hidden="true"></i>
                         <span class="status-indicator"></span>
                         <span>MutantComms Network</span>
                     </div>
                     <div class="phone-status">
                         <span class="cell-bars" aria-hidden="true"></span>
-                        <span class="wifi" aria-hidden="true"></span>
-                        <span class="battery" aria-hidden="true"></span>
+                        <i class="fa-solid fa-wifi" aria-hidden="true"></i>
+                        <i class="fa-solid fa-battery-full" aria-hidden="true"></i>
                     </div>
                 </header>
 
                 <header class="chat-header-row">
-                    <button class="back-button" type="button" aria-label="Back" onclick="window.location.href='index.html'">←</button>
+                    <button class="back-button" type="button" aria-label="Back" onclick="window.location.href='index.html'"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>
                     <div class="chat-user">
                         <div class="group-avatar" aria-hidden="true"></div>
                         <div class="chat-title">
                             <h1>Deadpool</h1>
-                            <p>Online</p>
+                            <p><i class="fa-solid fa-user" aria-hidden="true"></i> Online</p>
                         </div>
                     </div>
-                    <button class="info-button" type="button" aria-label="Info">i</button>
+                    <button class="info-button" type="button" aria-label="Chat information"><i class="fa-solid fa-circle-info" aria-hidden="true"></i></button>
                 </header>
 
                 <aside class="info-panel" aria-live="polite">
@@ -86,21 +91,21 @@
 
                 <form class="message-composer" aria-label="Send message">
                     <input type="text" maxlength="1200" placeholder="Send a message..." aria-label="Type a message">
-                    <button class="send-button" type="submit" aria-label="Send"></button>
+                    <button class="send-button" type="submit" aria-label="Send"><i class="fa-solid fa-paper-plane" aria-hidden="true"></i></button>
                 </form>
 
                 <nav class="bottom-nav" aria-label="Primary Navigation">
                     <a class="nav-item active" href="index.html">
-                        <span class="nav-icon messages" aria-hidden="true"></span>
+                        <i class="nav-icon fa-solid fa-comment" aria-hidden="true"></i>
                         <span>Messages</span>
                     </a>
                     <span class="nav-item nav-item-unavailable" aria-disabled="true" title="Mutants section unavailable">
-                        <span class="nav-icon mutants" aria-hidden="true"></span>
+                        <i class="nav-icon fa-solid fa-address-book" aria-hidden="true"></i>
                         <span>Mutants</span>
                         <span class="nav-unavailable-label">Unavailable</span>
                     </span>
                     <span class="nav-item nav-item-unavailable" aria-disabled="true" title="Field Desk unavailable">
-                        <span class="nav-icon danger" aria-hidden="true"></span>
+                        <i class="nav-icon fa-solid fa-folder-open" aria-hidden="true"></i>
                         <span>Field Desk</span>
                         <span class="nav-unavailable-label">Unavailable</span>
                     </span>

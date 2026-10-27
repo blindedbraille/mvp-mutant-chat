@@ -88,6 +88,94 @@ window.MutantCommsDialogue = {
       "That could become a problem in several decades.",
       "All right. What's the next step?",
       "I am documenting this for reasons you will understand later."
+    ],
+    Beast: [
+      "An intriguing hypothesis. What evidence led you there?",
+      "I would be delighted to examine the details.",
+      "A most unusual question, though not without merit.",
+      "Let us approach that with curiosity and caution.",
+      "I have a relevant book. Several, actually.",
+      "That calls for a little research before I hazard a guess.",
+      "You have my attention. Continue.",
+      "An unexpected variable, but hardly an unwelcome one.",
+      "A puzzle is always more interesting with company.",
+      "Let me think through the possibilities.",
+      "I would not rule it out without evidence.",
+      "A fascinating turn in the conversation.",
+      "I can offer a theory, if you have a moment.",
+      "That reminds me of a curious paper I read.",
+      "There may be a simpler explanation.",
+      "I admire your willingness to ask.",
+      "Let's test that idea before we dismiss it.",
+      "I shall add that to my list of curiosities.",
+      "Would you care to hear my considered opinion?",
+      "A second perspective may illuminate the problem."
+    ],
+    'Marvel Girl': [
+      "I'm listening. What made you think of that?",
+      "That's a big question. We can take it one part at a time.",
+      "I have a feeling there's more behind that question.",
+      "Go on. You can be honest with me.",
+      "That's unexpected, but I'm not judging.",
+      "Sometimes the question matters as much as the answer.",
+      "I'm here. Tell me what you really want to know.",
+      "I can see why that would stay on your mind.",
+      "You can take your time. I'm listening.",
+      "That's something I've wondered about, too.",
+      "I appreciate you asking me directly.",
+      "What do you think about it?",
+      "I don't have a perfect answer, but I'll be honest.",
+      "That sounds like it matters to you.",
+      "I can understand why you would ask.",
+      "Let's figure it out together.",
+      "I'm glad you felt comfortable asking.",
+      "Tell me a little more about what you mean.",
+      "I might have a thought or two about that.",
+      "We don't have to solve it all at once."
+    ],
+    'Professor X': [
+      "An interesting question. Let us examine it carefully.",
+      "There is often more than one perspective worth considering.",
+      "Tell me what brought this to mind.",
+      "Curiosity is a fine beginning to any conversation.",
+      "I would rather listen before I offer a conclusion.",
+      "That deserves patience and thoughtful consideration.",
+      "Go on. I am listening.",
+      "Perhaps we can find a clearer answer together.",
+      "There is no need to rush toward a conclusion.",
+      "An open mind is a useful place to begin.",
+      "I value the care you bring to this question.",
+      "What do you believe the answer might be?",
+      "We can consider the matter together.",
+      "I am grateful for your trust.",
+      "A thoughtful question deserves a thoughtful pause.",
+      "I will give that the attention it deserves.",
+      "There is wisdom in asking before assuming.",
+      "Please, tell me more.",
+      "Understanding begins with listening.",
+      "We need not have every answer today."
+    ],
+    Cyclops: [
+      "What's the objective?",
+      "Give me the facts first.",
+      "That wasn't in the briefing. Explain.",
+      "I need a little more context before I decide.",
+      "All right. What's your plan?",
+      "Let's keep this focused. What's the question?",
+      "I'll hear you out.",
+      "Noted. What do you need from me?",
+      "Give me the details and I'll assess it.",
+      "One thing at a time. What's the priority?",
+      "I'm not dismissing it. I need more information.",
+      "We'll find a solution. Start with the facts.",
+      "That could change the mission parameters.",
+      "I can work with that. What's next?",
+      "I'll make time. Go ahead.",
+      "Let's get ahead of the problem.",
+      "I want a clear picture before I respond.",
+      "Consider it noted. Keep me informed.",
+      "We'll deal with the immediate problem first.",
+      "What's the outcome you're hoping for?"
     ]
   },
   intents: {
@@ -116,16 +204,24 @@ window.MutantCommsDialogue = {
       Cable: ["Rumors are not intelligence. Verify before acting.", "I don't trade in unconfirmed reports.", "If it affects the team, take it to the person involved."]
     },
     greeting: {
-      Wolverine: ["Hey. What's up?", "Yeah, I'm here. You okay?", "Hey. Make it quick. Kidding. Mostly."],
-      Deadpool: ["Heyyy! You found the chat button. Gold star.", "Well, look who slid into the group thread.", "Hello, valued reader of my extremely unofficial text bubbles."],
-      Storm: ["Hello. I am glad you reached out.", "Good to hear from you. How are you?", "Hello, friend. What is on your mind?"],
-      Cable: ["I'm here. Go ahead.", "Check in received. What's the situation?", "Hey. I have a minute. Maybe two."]
+      Wolverine: ["Hey. What's up?", "Yeah, I'm here. You okay?", "Hey. Make it quick. Kidding. Mostly.", "Hey, bub. Long time no comm.", "You rang? Make it interesting."],
+      Deadpool: ["Heyyy! You found the chat button. Gold star.", "Well, look who slid into the group thread.", "Hello, valued reader of my extremely unofficial text bubbles.", "Greetings from your favorite red notification.", "Hey! I was just about to send you a very normal message."],
+      Storm: ["Hello. I am glad you reached out.", "Good to hear from you. How are you?", "Hello, friend. What is on your mind?", "It is good to hear your voice, even in text.", "Welcome. Tell me how you are doing."],
+      Cable: ["I'm here. Go ahead.", "Check in received. What's the situation?", "Hey. I have a minute. Maybe two.", "Signal received. Give me the short version.", "You're through. What do you need?"],
+      Beast: ["Hello! What fascinating subject brings you to my comms?", "Good to hear from you. What can I help you explore?"],
+      'Marvel Girl': ["Hey! I'm glad you messaged.", "Hi. How are you doing today?"],
+      'Professor X': ["Welcome. I am glad you reached out.", "Hello. What is on your mind?"],
+      Cyclops: ["You're through. What's the situation?", "Hey. I have a minute. Make it count."]
     },
     goodbye: {
-      Wolverine: ["Later. Keep your head down.", "All right. Take care of yourself.", "Go on. I'll be here."],
-      Deadpool: ["Exit stage left! Try not to miss my spin-off.", "Later! This chat will miss your typing bubble.", "Bye for now. No dramatic post-credit scene."],
-      Storm: ["Until next time. Take care.", "Go in peace. I am here when you need me.", "Farewell, and be kind to yourself."],
-      Cable: ["Signing off. Stay alert.", "Understood. We'll pick this up later.", "End of transmission. Be safe."]
+      Wolverine: ["Later. Keep your head down.", "All right. Take care of yourself.", "Go on. I'll be here.", "Catch you later, bub.", "Watch your back out there."],
+      Deadpool: ["Exit stage left! Try not to miss my spin-off.", "Later! This chat will miss your typing bubble.", "Bye for now. No dramatic post-credit scene.", "Signing off before the cliffhanger!", "Farewell. The sequel is already in development."],
+      Storm: ["Until next time. Take care.", "Go in peace. I am here when you need me.", "Farewell, and be kind to yourself.", "May the next hour bring you a little calm.", "Until we speak again, friend."],
+      Cable: ["Signing off. Stay alert.", "Understood. We'll pick this up later.", "End of transmission. Be safe.", "Channel clear. Keep me posted.", "Mission paused. We will regroup."],
+      Beast: ["Until next time. Do take care of yourself.", "Goodbye, and thank you for the engaging conversation."],
+      'Marvel Girl': ["Talk soon. Take care of yourself, okay?", "Bye! I'll be here if you need me."],
+      'Professor X': ["Until we speak again. Be well.", "Farewell. You are always welcome here."],
+      Cyclops: ["Signing off. Check in later.", "End of channel. Stay safe."]
     },
     wellbeing: {
       Wolverine: ["Been better. Been a lot worse, too.", "I'm all right. How about you?", "Still standing. That's usually a good sign."],
@@ -608,6 +704,241 @@ window.MutantCommsDialogue = {
         Storm: ["Japan holds an important place in Logan's life. I respect what it means to him.", "Every place carries a history. We should listen before we presume."],
         Cable: ["Madripoor is a dangerous place to improvise. Go in with a plan.", "Those connections have shaped Logan's decisions for years."]
       }
+    },
+    favoriteFood: {
+      aliases: ["favorite food", "favourite food", "favorite snack", "favourite snack", "favorite drink", "favourite drink", "what do you eat", "what do you like eating", "snack", "comfort food", "pizza", "taco", "chimichanga"],
+      responses: {
+        Wolverine: ["Steak, if it's cooked right. Coffee if it's early.", "A good burger. Nothing fancy, extra pickles."],
+        Deadpool: ["Chimichangas. This is not a phase, this is a lifestyle.", "Tacos, chimichangas, and whatever the kitchen says is not radioactive."],
+        Storm: ["I love a fragrant tea and a meal shared with friends.", "Fresh fruit, warm bread, and good company. The company matters most."],
+        Cable: ["Coffee. Strong, plain, and available before a briefing.", "A field ration when necessary. My daughter insists on pancakes."],
+        Beast: ["A proper cup of tea and a well-prepared soufflé.", "I have a weakness for blue cheese and a balanced breakfast."],
+        'Marvel Girl': ["My mom's cinnamon toast. It always tastes like home.", "Pasta with friends. I like the conversation as much as the meal."],
+        'Professor X': ["Tea with the students is always a pleasure.", "A quiet breakfast and good conversation are difficult to improve upon."],
+        Cyclops: ["Coffee before training. Pancakes after.", "Whatever the team can eat together between drills."]
+      }
+    },
+    movies: {
+      aliases: ["favorite movie", "favourite movie", "movies", "films", "favorite show", "favourite show", "tv show", "television"],
+      responses: {
+        Wolverine: ["Old westerns. The good ones don't need a lot of talking.", "Anything with a decent story and no dramatic retcons."],
+        Deadpool: ["Any movie where I get top billing. I am a very reliable source.", "I like the ones with a post-credit scene. For reasons."],
+        Storm: ["I enjoy stories about courage, chosen family, and a little wonder.", "A thoughtful film with beautiful music stays with me."],
+        Cable: ["Documentaries. If the facts are good, the runtime is irrelevant.", "I prefer a clear plot and an ending that holds up under scrutiny."],
+        Beast: ["A classic science-fiction film, ideally with scientifically questionable premises.", "I enjoy a well-crafted documentary. And the occasional musical."],
+        'Marvel Girl': ["A good mystery or a romantic comedy with my friends.", "Anything that lets me laugh without thinking about a mission."],
+        'Professor X': ["I have always valued stories that ask what we owe one another.", "A classic film discussed afterward is a lovely evening."],
+        Cyclops: ["A tight action film. No unnecessary complications.", "The team picks. I handle the snacks."]
+      }
+    },
+    music: {
+      aliases: ["favorite music", "favourite music", "music", "favorite song", "favourite song", "what do you listen to", "band", "playlist"],
+      responses: {
+        Wolverine: ["Classic rock. Keep the volume up.", "Old blues. You can hear the truth in it."],
+        Deadpool: ["A playlist that jumps from show tunes to metal without warning.", "Anything with a dramatic chorus and room for a dance break."],
+        Storm: ["Jazz, soul, and music that lets you feel the whole room breathe.", "I love a powerful voice and a rhythm you can move with."],
+        Cable: ["Whatever keeps me alert on a long watch.", "I don't choose the playlist. The team does. I endure."],
+        Beast: ["Jazz. The improvisation is almost mathematical.", "Opera, jazz, and a truly unreasonable amount of classical music."],
+        'Marvel Girl': ["Motown and anything I can sing along to.", "My playlist is mostly upbeat, with a little dramatic piano."],
+        'Professor X': ["Classical music has always offered me room to reflect.", "I enjoy hearing what the students are listening to these days."],
+        Cyclops: ["Something with a steady beat for training.", "I let the team control the music. It's a leadership compromise."]
+      }
+    },
+    hobbies: {
+      aliases: ["hobby", "hobbies", "free time", "what do you do for fun", "what do you do for a hobby", "pastime", "what do you do off duty"],
+      responses: {
+        Wolverine: ["I like a quiet trail and nobody asking me to lead.", "Working with my hands. Fixing things, mostly."],
+        Deadpool: ["Cooking, karaoke, and making this chat weirdly specific.", "I collect questionable souvenirs and excellent snack opinions."],
+        Storm: ["Reading, gardening, and finding a little quiet outdoors.", "I enjoy sharing stories and making time for the people I love."],
+        Cable: ["Maintenance, training, and checking on my family.", "A quiet evening without a temporal emergency is a fine hobby."],
+        Beast: ["Reading, inventing, and keeping the greenhouse thriving.", "I enjoy a good chess game and a better scientific puzzle."],
+        'Marvel Girl': ["I read, listen to music, and spend time with my friends.", "A quiet afternoon with a book can be just what I need."],
+        'Professor X': ["Reading, chess, and watching young people discover their strengths.", "I enjoy a thoughtful conversation and a well-tended garden."],
+        Cyclops: ["Training. It keeps the team ready.", "I spend free time with the people I care about. When schedules allow."]
+      }
+    },
+    favoriteXman: {
+      aliases: ["favorite x-man", "favourite x-man", "favorite x man", "favourite x man", "favorite x-men member", "favourite x-men member", "who is your favorite x-man", "who's your favorite x-man", "who is your favourite x-man", "who's your favourite x-man"],
+      responses: {
+        Wolverine: ["The ones who show up for each other. That's what makes a team.", "Not picking favorites. I've got respect for anyone who keeps fighting for people."],
+        Deadpool: ["Me, obviously. Kidding! The answer changes depending on who brought snacks.", "Favorite? That's a popularity poll waiting to become a crossover."],
+        Storm: ["Each of them brings a strength the rest of us need.", "I would not choose one. Our differences are part of what make us a family."],
+        Cable: ["The one who can adapt under pressure and protect the team.", "A roster is strongest when every member can be relied upon."],
+        Beast: ["A difficult question; each colleague has a quality I admire.", "I value curiosity, compassion, and a well-timed intervention."],
+        'Marvel Girl': ["That's impossible to answer. They're all important to me in different ways.", "The one who needs a friend most that day. It changes."],
+        'Professor X': ["I have never wished to rank my students. Each has a gift worth celebrating.", "The X-Men are strongest when every voice is heard."],
+        Cyclops: ["The one who follows the plan and protects the team. I won't name names.", "My job is to trust every member of the team."]
+      }
+    },
+    biggestFear: {
+      aliases: ["biggest fear", "what are you afraid of", "what scares you most", "what frightens you", "what do you fear most"],
+      responses: {
+        Wolverine: ["Losing control and hurting someone who trusted me.", "Outliving everyone I care about. I've had too much practice at that."],
+        Deadpool: ["Being alone with my thoughts. They do not have an indoor voice.", "That the people I love only see the mask. Some days I joke so I don't have to find out."],
+        Storm: ["Failing those who place their trust in me. I meet that fear with care, not silence.", "A world where fear teaches us to stop seeing one another as people."],
+        Cable: ["A future I could have prevented. It keeps me focused on what I can do now.", "Putting the mission ahead of the people it is meant to protect."],
+        Beast: ["That we might mistake knowledge for wisdom.", "A future in which fear outpaces our compassion and reason."],
+        'Marvel Girl': ["Losing the people I love, or being unable to reach them when they need me.", "Sometimes it's the uncertainty. Talking about it helps."],
+        'Professor X': ["That our fear of one another will keep us from building a more peaceful world.", "Failing to help a student see their own worth. I remind myself to listen."],
+        Cyclops: ["Making the wrong call when the team is counting on me.", "Losing someone because I was too focused on the plan."]
+      }
+    },
+    joke: {
+      aliases: ["tell me a joke", "can you tell me a joke", "share a joke", "make me laugh", "joke"],
+      responses: {
+        Wolverine: ["Why don't I tell jokes? The punchline usually gets away.", "I know a joke about a broken pencil. Never mind. It's pointless."],
+        Deadpool: ["Why did the mutant bring a pencil to the Danger Room? To draw fire. You're welcome.", "I have a joke about the fourth wall, but you already know where it ends."],
+        Storm: ["Why did the cloud stay home? It was feeling under the weather.", "I will leave the lightning puns to Ororo. Oh, wait."],
+        Cable: ["I had a joke about time travel. You didn't like it next week either.", "The briefing said to expect a punchline. I prepared for impact."],
+        Beast: ["Why did the biologist bring a ladder? To study the higher forms of life.", "I have a joke about entropy, but it tends to fall apart."],
+        'Marvel Girl': ["Why did the book join the X-Men? It wanted a good origin story.", "I know a telepathy joke, but you've probably heard it already."],
+        'Professor X': ["Why did the student bring a map to the library? To find their way through the plot.", "I have a joke about mind readers, but I suspect you saw it coming."],
+        Cyclops: ["Why did the team bring a map? To stay on target.", "I have a joke about the Danger Room. It's a work in progress."]
+      }
+    },
+    xmenMembership: {
+      aliases: ["can i join the x-men", "can i join x-men", "join the x-men", "join x-men", "become an x-man", "can i be an x-man", "can i be an x-men"],
+      responses: {
+        Wolverine: ["You don't need a uniform to help people. Start by showing up for somebody.", "The team isn't a club. Be yourself, and look out for the people around you."],
+        Deadpool: ["There's an application. It's mostly snacks and one very dramatic headshot.", "Step one: bring chimichangas. Step two: ask Storm; she actually runs a tight ship."],
+        Storm: ["The X-Men are not defined by a uniform. We begin by choosing to protect and understand one another.", "You are welcome to stand with us in the work of making the world kinder."],
+        Cable: ["The first requirement is showing sound judgment under pressure. The rest can be trained.", "Start by helping your community. Field experience matters."],
+        Beast: ["A willingness to learn and to treat others with dignity is an excellent beginning.", "You need not be a mutant to support the dream of peaceful coexistence."],
+        'Marvel Girl': ["If you want to help people, you're already starting in the right place.", "You don't need powers to be part of something good. Be kind and show up."],
+        'Professor X': ["The dream is open to anyone committed to understanding and protecting others.", "Our cause needs allies of every kind. Begin with compassion."],
+        Cyclops: ["Start with training, teamwork, and following instructions when it counts.", "We need reliable allies. Protect people, communicate clearly, and keep learning."]
+      }
+    },
+    avengers: {
+      aliases: ["avengers", "avengers versus x-men", "avengers vs x-men", "avengers vs the x-men"],
+      responses: {
+        Wolverine: ["Some of them are good people. That doesn't mean we always agree.", "I'd rather have them beside us when things get ugly."],
+        Deadpool: ["A crossover means more capes, more paperwork, and fewer panels for me.", "The Avengers are great. Their group-chat naming convention needs work."],
+        Storm: ["We share the duty of protecting people. Cooperation must begin with respect.", "Our teams may differ, but the lives we protect matter equally."],
+        Cable: ["An alliance is useful when objectives align. Verify the plan, then commit.", "Conflict between teams is avoidable. The consequences are not always."],
+        Beast: ["Their ranks include extraordinary minds. Collaboration is often our best instrument.", "I would prefer a joint research colloquium to a team-wide altercation."],
+        'Marvel Girl': ["Most of them are people trying to do the right thing. We should talk first.", "The X-Men and Avengers can disagree without making civilians pay for it."],
+        'Professor X': ["We must seek understanding before allowing fear to divide our teams.", "Our shared responsibility is to protect those who cannot protect themselves."],
+        Cyclops: ["We coordinate when we can. The mission comes before the rivalry.", "I want a clear chain of command before anyone calls it an alliance."]
+      }
+    },
+    marvelCharacters: {
+      aliases: ["spider-man", "spiderman", "peter parker", "captain america", "steve rogers", "thor", "hulk", "bruce banner", "black widow", "natasha romanoff", "iron man", "tony stark", "fantastic four", "reed richards", "sue storm", "johnny storm", "ben grimm", "mr fantastic", "invisible woman", "human torch", "thing", "deadpool", "wade wilson"],
+      responses: {
+        Wolverine: ["I respect the ones who show up when it counts. Some of them talk more than others.", "I've fought beside a lot of heroes. Judge them by what they do when it gets hard."],
+        Deadpool: ["Big fan. Some of them even have their own comics. Allegedly.", "Great heroes, questionable crossover scheduling."],
+        Storm: ["Their courage is clear. I hope they remember that power is best used with compassion.", "I respect their work. We should meet one another as allies, not symbols."],
+        Cable: ["Capable people, volatile alliances. I assess the person, not the logo.", "Different teams, overlapping threats. Coordination matters more than credit."],
+        Beast: ["The Fantastic Four's research is remarkable, particularly Richards' work.", "A number of them are exceptional colleagues. I would welcome a proper symposium."],
+        'Marvel Girl': ["I admire people who keep caring, even when the work gets difficult.", "They've got their own complicated lives. I try not to reduce anyone to a headline."],
+        'Professor X': ["They have each made meaningful sacrifices. We should build bridges where possible.", "I believe there is more to gain from a conversation than a contest."],
+        Cyclops: ["Some are excellent field allies. I want a shared plan before we deploy.", "I respect their experience. Clear coordination keeps everyone safer."]
+      }
+    },
+    doctorDoom: {
+      aliases: ["doctor doom", "dr doom", "dr. doom", "victor von doom", "victor doom", "doom"],
+      responses: {
+        Wolverine: ["Doom's dangerous. Don't give him a clean shot or a reason to monologue.", "He thinks a title makes him untouchable. It doesn't."],
+        Deadpool: ["He has a cape, a mask, and a whole country. My brand consultant is taking notes.", "Doom is a lot. Even his punctuation sounds expensive."],
+        Storm: ["His intellect is formidable. His pride has caused immeasurable harm.", "Power without humility is a danger to everyone around him."],
+        Cable: ["Treat Doom as a high-level threat. Never assume the first plan is the only plan.", "His technology and ambition make him unpredictable. Prepare accordingly."],
+        Beast: ["Victor's intellect is considerable; his willingness to listen is less so.", "A brilliant mind is no substitute for ethical restraint."],
+        'Marvel Girl': ["I wish he would use his gifts to help people instead of controlling them.", "His pride can fill a room. I hope he learns to hear anyone else in it."],
+        'Professor X': ["Victor is capable of great things, yet repeatedly chooses domination over trust.", "I have always hoped reason might reach him. Hope requires boundaries, too."],
+        Cyclops: ["High threat. Don't engage without intel and an exit plan.", "Doom is smart, armed, and convinced he's right. Plan for all three."]
+      }
+    }
+  },
+  marvelOpinions: {
+    Deadpool: {
+      Wolverine: ["Wade's a pain in the neck. Still, he shows up when it counts.", "He talks too much, but I know what it's like to wear a mask."],
+      Deadpool: ["Finally, a question about the main character. Excellent taste.", "I think Wade Wilson is a very handsome, deeply complicated mystery. I may be biased."],
+      Storm: ["Wade uses humor to protect a deeply wounded heart. I hope he finds peace.", "He is more than his jokes, and deserves to be treated with care."],
+      Cable: ["Wilson is unpredictable, but capable. Keep him focused on the objective.", "He can be an effective ally. Set clear boundaries and verify the plan."],
+      Beast: ["Wade's healing factor is extraordinary; his coping mechanisms are equally remarkable.", "He is far more perceptive than he lets on."],
+      'Marvel Girl': ["He can be a lot, but I know there's a kind person under all that humor.", "I hope Wade knows he doesn't have to make everyone laugh to be cared about."],
+      'Professor X': ["Wade's humor often shields deep pain. He deserves patience and understanding.", "There is a thoughtful person behind the performance."],
+      Cyclops: ["Unorthodox, noisy, and occasionally effective. Keep him on task.", "He is difficult to manage, but not impossible to rely on."]
+    },
+    'Spider-Man': {
+      Wolverine: ["The kid talks too much. Still shows up when it counts.", "Parker's got heart. I'll give him that."],
+      Deadpool: ["Spider-Man is my favorite wall-crawler with a great power-to-responsibility ratio.", "Pete and I have a lot in common. He has better editorial supervision."],
+      Storm: ["Peter's compassion is remarkable. He carries more than anyone should alone.", "His sense of responsibility is admirable, even when it weighs on him."],
+      Cable: ["Parker is capable and improvisational. His tendency to operate alone is a risk.", "A good ally. Keep him informed and give him room to adapt."],
+      Beast: ["Parker is an ingenious young scientist as well as a hero.", "His intellect is often underestimated, to his credit."],
+      'Marvel Girl': ["Peter is kind, funny, and far too hard on himself.", "He tries so hard to do right by everyone. I hope someone checks on him."],
+      'Professor X': ["Peter has a rare gift for empathy. I hope he remembers to extend it to himself.", "His courage is rooted in a deep sense of responsibility."],
+      Cyclops: ["A talented improviser. I would still like to see him follow a plan.", "He is dependable under pressure. His independent streak complicates briefings."]
+    },
+    'Captain America': {
+      Wolverine: ["Rogers is the real deal. I've followed his lead before.", "Cap's got my respect. He's earned every bit of it."],
+      Deadpool: ["Steve Rogers is a walking recruiting poster. In a good way!", "Captain America has better speeches. I have better snacks."],
+      Storm: ["Steve's courage is matched by his principles. I trust that combination.", "He leads by example, and that matters."],
+      Cable: ["Rogers is disciplined and decisive. A reliable commander.", "His judgment has held through more than one crisis."],
+      Beast: ["Rogers' leadership is an object lesson in moral clarity.", "His integrity is as impressive as his service record."],
+      'Marvel Girl': ["Steve makes people feel safer just by standing with them.", "He believes in people. That kind of faith is powerful."],
+      'Professor X': ["Steve's conviction in the dignity of others is admirable.", "He reminds us that ideals require action."],
+      Cyclops: ["Rogers is a strong field leader. I value a clear chain of command.", "I respect his decisions, especially when the stakes are high."]
+    },
+    Thor: {
+      Wolverine: ["The thunder god's all right. Keeps his word.", "Strong, loud, and decent. I've met worse."],
+      Deadpool: ["Thor has a magic hammer and a dramatic entrance. Relatable.", "He says 'thee' unironically. I respect the commitment."],
+      Storm: ["Thor commands lightning, but the sky is not a weapon to own.", "His power is great. His humility has grown with it."],
+      Cable: ["Thor is a powerful ally. Build contingency plans around the lightning.", "Reliable in a crisis. Do not mistake strength for invulnerability."],
+      Beast: ["The Asgardian sciences are fascinating, though not easily replicated.", "A remarkable being, and an even more remarkable research opportunity."],
+      'Marvel Girl': ["He's kinder than the stories make him sound.", "Thor has a big heart beneath all that thunder."],
+      'Professor X': ["His journey toward humility has been as important as his power.", "Thor can be a thoughtful friend and a formidable ally."],
+      Cyclops: ["Powerful, experienced, and accustomed to command. Coordinate clearly.", "A strong ally. I would still want a plan for when the hammer is elsewhere."]
+    },
+    Hulk: {
+      Wolverine: ["Banner's a good man. The Hulk needs room and respect.", "Don't mistake the rage for the whole person."],
+      Deadpool: ["Bruce is a genius. The other guy is also not a fan of personal space.", "I would not recommend arguing with the green one about parking."],
+      Storm: ["Bruce deserves compassion, not fear. His strength is not all he is.", "We must see the person before we see the power."],
+      Cable: ["Banner is a brilliant scientist. Give him space and avoid escalation.", "Plan for the Hulk's strength; never write Bruce off as the threat."],
+      Beast: ["Banner's work in gamma physics is extraordinary. The circumstances are tragic.", "I would welcome a careful scientific exchange with Bruce."],
+      'Marvel Girl': ["Bruce deserves friends who see him, not just the Hulk.", "He has been through so much. I hope he finds some peace."],
+      'Professor X': ["Bruce is a person deserving of understanding and safety.", "Fear has isolated him for too long. Compassion is the wiser response."],
+      Cyclops: ["Banner is the contact. Don't provoke a transformation.", "Keep civilians clear and give Bruce a chance to de-escalate."]
+    },
+    'Black Widow': {
+      Wolverine: ["Romanoff knows her work. I'd want her on my side.", "Natasha's one of the best. Don't underestimate her."],
+      Deadpool: ["Black Widow can out-spy a spy movie. Respect.", "She has seen my file. I choose to believe it's flattering."],
+      Storm: ["Natasha has made her own choices and fought to define herself.", "Her strength includes knowing who she wishes to become."],
+      Cable: ["Romanoff is precise, composed, and difficult to surprise.", "Excellent field operator. Share only what the mission requires."],
+      Beast: ["Natasha's analytical discipline is impressive.", "She brings a keen understanding of human behavior to the field."],
+      'Marvel Girl': ["Natasha is strong, smart, and more than her past.", "I admire how she keeps choosing her own path."],
+      'Professor X': ["Natasha's story shows that our past need not dictate our future.", "She has earned the right to define herself."],
+      Cyclops: ["Romanoff is a first-rate operative. I trust her assessment.", "Efficient and adaptable. Keep communications concise."]
+    },
+    'Iron Man': {
+      Wolverine: ["Stark's smart. Talks too much. Builds good gear.", "Tony's a pain, but he comes through when it counts."],
+      Deadpool: ["Iron Man has an entire suit budget. I have pockets.", "Tony Stark: proof that a billionaire can still need a user manual."],
+      Storm: ["Tony's inventions can help many. His choices must remain accountable.", "His brilliance is real. So is the responsibility it carries."],
+      Cable: ["Stark's tech is useful. Establish security protocols before connecting it.", "Good engineer, unpredictable leadership style."],
+      Beast: ["Tony's engineering is extraordinary. Our debates are equally so.", "Stark's work is impressive; peer review remains essential."],
+      'Marvel Girl': ["Tony is funnier than he thinks and more thoughtful than he lets on.", "I hope he remembers he does not have to solve everything alone."],
+      'Professor X': ["Tony's intellect is formidable. I encourage him to listen as well as invent.", "His capacity for change is one of his greatest strengths."],
+      Cyclops: ["Stark's equipment is effective. I want a technical briefing first.", "I respect the engineering. I prefer to know who controls the system."]
+    },
+    'Fantastic Four': {
+      Wolverine: ["Good people. Reed could stand to put the lab away once in a while.", "Ben's solid. The rest of them are all right, too."],
+      Deadpool: ["A family team! Four is a very respectable number of members.", "Reed has the science, Sue has the force field, Ben has the rocks, Johnny has the catchphrases."],
+      Storm: ["Their bond is their greatest strength. I admire how they stand together.", "Sue's leadership is often underestimated. I never make that mistake."],
+      Cable: ["Experienced team. Their family dynamic is a strength and a variable.", "Richards' technology can be invaluable. Set clear operational boundaries."],
+      Beast: ["Reed's scientific contributions are extraordinary. I enjoy our exchanges.", "A collaboration with Richards would be intellectually invigorating."],
+      'Marvel Girl': ["They really do look out for one another. That matters.", "Sue is amazing. I hope they all remember to take a day off."],
+      'Professor X': ["They have built a remarkable family while serving the world.", "Their example shows how trust can turn difference into strength."],
+      Cyclops: ["A capable team. Sue and Reed make strong tactical calls.", "We work well together when roles and objectives are clear."]
+    },
+    'Doctor Doom': {
+      Wolverine: ["Doom's dangerous. Don't let him control the room.", "He thinks a title makes him untouchable. It doesn't."],
+      Deadpool: ["He has a cape, a mask, and a whole country. My brand consultant is taking notes.", "Doom is a lot. Even his punctuation sounds expensive."],
+      Storm: ["His intellect is formidable. His pride has caused great harm.", "Power without humility is a danger to everyone around him."],
+      Cable: ["Treat Doom as a high-level threat. Never assume the first plan is the only plan.", "His technology and ambition make him unpredictable."],
+      Beast: ["Victor's intellect is considerable; his willingness to listen is less so.", "Brilliance is no substitute for ethical restraint."],
+      'Marvel Girl': ["I wish he would use his gifts to help people instead of controlling them.", "His pride can fill a room. I hope he learns to hear anyone else in it."],
+      'Professor X': ["Victor is capable of great things, yet chooses domination over trust.", "I have hoped reason might reach him. Hope requires boundaries, too."],
+      Cyclops: ["High threat. Don't engage without intel and an exit plan.", "Doom is smart, armed, and convinced he's right. Plan for all three."]
     }
   }
 };

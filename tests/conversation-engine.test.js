@@ -220,7 +220,7 @@ report('Group chat produces no unscheduled author when no supported members are 
   engine.respond({
     conversationId: 'gold-squad',
     character: 'Gold Squad',
-    participants: ['Beast'],
+    participants: ['Mystique'],
     text: 'What is happening?'
   }).messages.length === 0);
 
@@ -465,6 +465,92 @@ try {
 }
 report('Removing an avatar produces a distinct scripted reset reaction',
   avatarResetComment?.author === 'Cable' && /reset|removed|default/i.test(avatarResetComment.text));
+
+const expandedCharacters = ['Wolverine', 'Deadpool', 'Storm', 'Cable', 'Beast', 'Marvel Girl', 'Professor X', 'Cyclops'];
+const foodReplies = expandedCharacters.map((character) => {
+  const conversationId = `suite-food-${character}`;
+  engine.reset(conversationId);
+  return engine.respond({
+    conversationId,
+    character,
+    text: 'What is your favorite food?'
+  });
+});
+report('Favorite-food questions have a distinct response for every Gold Squad character',
+  foodReplies.every((reply, index) =>
+    reply.analysis.topics.includes('favoriteFood') &&
+    reply.messages[0]?.author === expandedCharacters[index] &&
+    reply.messages[0]?.text.length > 0));
+
+engine.reset('suite-spider-wolverine');
+const spiderWolverine = engine.respond({
+  conversationId: 'suite-spider-wolverine',
+  character: 'Wolverine',
+  text: 'What do you think of Spider-Man?'
+});
+engine.reset('suite-spider-deadpool');
+const spiderDeadpool = engine.respond({
+  conversationId: 'suite-spider-deadpool',
+  character: 'Deadpool',
+  text: 'Do you know Peter Parker?'
+});
+report('Marvel-character questions trigger character-specific Spider-Man opinions',
+  spiderWolverine.analysis.topics.includes('marvelCharacters') &&
+  spiderDeadpool.analysis.topics.includes('marvelCharacters') &&
+  spiderWolverine.messages[0]?.text !== spiderDeadpool.messages[0]?.text);
+
+engine.reset('suite-reed-beast');
+const reedBeast = engine.respond({
+  conversationId: 'suite-reed-beast',
+  character: 'Beast',
+  text: 'What do you think of Reed Richards?'
+});
+report('The Fantastic Four and Reed Richards are recognized as a specific topic',
+  reedBeast.analysis.entities.includes('Fantastic Four') &&
+  reedBeast.analysis.topics.includes('marvelCharacters') &&
+  /scientific|collaboration/i.test(reedBeast.messages[0]?.text || ''));
+
+engine.reset('suite-doom-topic');
+const doomTopic = engine.respond({
+  conversationId: 'suite-doom-topic',
+  character: 'Storm',
+  text: 'What do you think of Victor Von Doom?'
+});
+report('Doctor Doom aliases trigger character-specific scripted responses',
+  doomTopic.analysis.topics.includes('doctorDoom') &&
+  doomTopic.analysis.entities.includes('Doctor Doom') &&
+  /intellect|power|pride/i.test(doomTopic.messages[0]?.text || ''));
+
+const tipsPrompts = [
+  ["What's your favourite food?", 'favoriteFood'],
+  ['What do you do for fun?', 'hobbies'],
+  ["Who's your favourite X-Man?", 'favoriteXman'],
+  ["What's your biggest fear?", 'biggestFear'],
+  ['What do you think of Spider-Man?', 'marvelCharacters'],
+  ['Do you know Captain America?', 'marvelCharacters'],
+  ['What do you think of the Avengers?', 'avengers'],
+  ['What do you think of Doctor Doom?', 'doctorDoom'],
+  ['Who would win, Hulk or Wolverine?', 'fight'],
+  ['Do you have a crush on anyone?', 'crush_question'],
+  ["What's your most embarrassing moment?", 'awkward_question'],
+  ['Can you tell me a joke?', 'joke'],
+  ['What do you think of Deadpool?', 'marvelCharacters'],
+  ['Can I join the X-Men?', 'xmenMembership']
+];
+const tipsPromptResults = tipsPrompts.map(([text, expected], index) => {
+  const conversationId = `suite-tips-${expected}-${index}`;
+  engine.reset(conversationId);
+  const result = engine.respond({
+    conversationId,
+    character: 'Wolverine',
+    text
+  });
+  return result.messages.length > 0 &&
+    (result.analysis.topics.includes(expected) || result.analysis.intent === expected);
+});
+report('Every Tips & Tricks question is recognized and answered',
+  tipsPromptResults.every(Boolean),
+  `${tipsPromptResults.filter(Boolean).length}/${tipsPrompts.length} prompts`);
 
 summary.textContent = `${passed} passed, ${failed} failed.`;
 summary.style.color = failed ? '#b00020' : '#08752d';
