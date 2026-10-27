@@ -1369,6 +1369,30 @@ input {
   background: transparent;
 }
 
+.settings-reset-chats {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  margin-top: 12px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 64, 88, 0.34);
+  border-radius: 7px;
+  background: rgba(255, 64, 88, 0.08);
+  color: var(--muted-strong);
+  font-size: 0.62rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.settings-reset-chats:hover,
+.settings-reset-chats:focus-visible {
+  border-color: var(--red);
+  background: rgba(255, 64, 88, 0.16);
+  color: #fff;
+  outline: none;
+}
+
 .settings-save:disabled,
 .settings-remove:disabled {
   opacity: 0.5;

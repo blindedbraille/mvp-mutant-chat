@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const PROFILE_META_KEY = `${STORAGE_PREFIX}profile:metadata`;
   const SPICY_MODE_KEY = `${STORAGE_PREFIX}settings:spicy`;
   const DOOM_COOLDOWN_KEY = `${STORAGE_PREFIX}easter-egg:doom`;
+  const CHATS_RESET_KEY = `${STORAGE_PREFIX}chats:reset`;
   const DOOM_COOLDOWN_MS = 5 * 60 * 1000;
   const AVATAR_DB_NAME = 'mutant-comms-profile';
   const REACTIONS = ['❤️', '😂', '👍', '😮', '😢', '❗'];
@@ -638,9 +639,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const remove = createSettingsElement('button', 'settings-remove', 'Remove picture');
     remove.type = 'button';
     actions.append(save, remove);
+    const resetChats = createSettingsElement('button', 'settings-reset-chats');
+    resetChats.type = 'button';
+    const resetIcon = createSettingsElement('i', 'fa-solid fa-rotate');
+    resetIcon.setAttribute('aria-hidden', 'true');
+    resetChats.append(resetIcon, document.createTextNode('Restart all chats'));
     const status = createSettingsElement('p', 'settings-status');
     status.setAttribute('role', 'status');
-    panel.append(titleRow, profileHeading, profileRow, cropEditor, vibeLabel, spicyLabel, actions, status);
+    panel.append(titleRow, profileHeading, profileRow, cropEditor, vibeLabel, spicyLabel, actions, resetChats, status);
     shell.append(panel);
     trigger.setAttribute('aria-controls', panel.id);
     trigger.setAttribute('aria-expanded', 'false');
@@ -652,6 +658,31 @@ document.addEventListener('DOMContentLoaded', () => {
     let cropOffsetX = 0;
     let cropOffsetY = 0;
     const setStatus = (message) => { status.textContent = message; };
+    resetChats.addEventListener('click', () => {
+      if (!window.confirm('Restart all chats? This clears saved messages, drafts, reactions, and chat memory on this device.')) return;
+      try {
+        const chatDataPrefixes = [
+          `${STORAGE_PREFIX}messages:`,
+          `${STORAGE_PREFIX}reactions:`,
+          `${STORAGE_PREFIX}draft:`,
+          'mutant-comms:memory:'
+        ];
+        const keysToRemove = [];
+        for (let index = 0; index < localStorage.length; index += 1) {
+          const key = localStorage.key(index);
+          if (key && (key === `${STORAGE_PREFIX}unread` ||
+              chatDataPrefixes.some((prefix) => key.startsWith(prefix)))) {
+            keysToRemove.push(key);
+          }
+        }
+        keysToRemove.forEach((key) => localStorage.removeItem(key));
+        localStorage.setItem(CHATS_RESET_KEY, `${Date.now()}-${Math.random()}`);
+        window.location.assign('index.html');
+      } catch (error) {
+        console.error('MutantComms could not restart all chats.', error);
+        setStatus(error.message || 'Could not restart all chats. Check this browser’s storage settings.');
+      }
+    });
     const updateCropPreview = () => {
       const size = cropViewport.clientWidth;
       const imageWidth = cropPreview.naturalWidth || size;
@@ -1176,6 +1207,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
     window.setInterval(updateHomeConversationPreviews, 60_000);
+  }
+
+  function initializeChatResetListener() {
+    window.addEventListener('storage', (event) => {
+      if (event.key === CHATS_RESET_KEY && event.newValue) window.location.reload();
+    });
   }
 
   function applyUnreadState(item, count, animate = false) {
@@ -2103,6 +2140,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const openWelcomeExperience = initializeWelcomeExperience();
+  initializeChatResetListener();
   createSettingsPanel();
   initializeArchiveAccess();
   initializeTipsPanel();
