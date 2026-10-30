@@ -1963,6 +1963,10 @@ input {
   object-fit: cover;
 }
 
+.info-profile-avatar[src$="wolverine-pfp.webp"] {
+  object-position: center 20%;
+}
+
 .info-profile-codename,
 .info-profile-name {
   margin: 0;
