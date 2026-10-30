@@ -106,18 +106,6 @@ input {
   overflow: hidden;
 }
 
-.presentation-board::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.18) 0%, rgba(0, 0, 0, 0.18) 18%, transparent 19%),
-    radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.14) 0%, rgba(0, 0, 0, 0.14) 26%, transparent 27%),
-    radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.1) 42%, transparent 43%);
-  opacity: 0.45;
-  pointer-events: none;
-}
-
 .presentation-board::after {
   content: "X-MEN FIELD ARCHIVE";
   position: absolute;
@@ -593,10 +581,13 @@ input {
 }
 
 .group-avatar {
+  flex: 0 0 30px;
   width: 30px;
   height: 30px;
   border-radius: 50%;
   background: rgba(255,255,255,0.9);
+  background-position: center;
+  background-size: cover;
   border: 2px solid var(--yellow);
 }
 
