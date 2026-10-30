@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const SPICY_MODE_KEY = `${STORAGE_PREFIX}settings:spicy`;
   const DOOM_COOLDOWN_KEY = `${STORAGE_PREFIX}easter-egg:doom`;
   const CHATS_RESET_KEY = `${STORAGE_PREFIX}chats:reset`;
+  const ACTIVE_CONVERSATION_PREFIX = `${STORAGE_PREFIX}active:`;
   const DOOM_COOLDOWN_MS = 5 * 60 * 1000;
   const AVATAR_DB_NAME = 'mutant-comms-profile';
   const REACTIONS = ['❤️', '😂', '👍', '😮', '😢', '❗'];
@@ -160,7 +161,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const conversation = phone?.dataset.conversationId ||
     pageTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const isChatPage = Boolean(document.querySelector('.chat-messages'));
+  const pageInstanceId = window.crypto?.randomUUID?.() ||
+    `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
   let profileImageUrl = '';
+  let conversationIsLeaving = false;
   let currentProfileMeta = normalizeProfileMeta(readStorage(PROFILE_META_KEY, {
     revision: 0,
     acknowledgedRevision: 0,
@@ -230,6 +234,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function reactionStorageKey() {
     return `${STORAGE_PREFIX}reactions:${conversation}`;
+  }
+
+  function activeConversationKey(name = conversation) {
+    return `${ACTIVE_CONVERSATION_PREFIX}${name}:${pageInstanceId}`;
+  }
+
+  function hasActiveConversation(name) {
+    const prefix = `${ACTIVE_CONVERSATION_PREFIX}${name}:`;
+    const now = Date.now();
+    let active = false;
+    try {
+      for (let index = 0; index < localStorage.length; index += 1) {
+        const key = localStorage.key(index);
+        if (!key?.startsWith(prefix)) continue;
+        const lastSeen = Number(JSON.parse(localStorage.getItem(key) || '0'));
+        if (Number.isFinite(lastSeen) && now - lastSeen < 15_000) {
+          active = true;
+        } else {
+          localStorage.removeItem(key);
+          index -= 1;
+        }
+      }
+    } catch (error) {
+      console.error(`MutantComms could not check active conversation "${name}".`, error);
+    }
+    return active;
   }
 
   function displayAuthor(name) {
@@ -1277,12 +1307,47 @@ document.addEventListener('DOMContentLoaded', () => {
   function initializeNotifications() {
     updateHomeUnreadStates();
 
-    if (isChatPage && conversation) setUnreadCount(conversation, 0);
+    const activeKey = isChatPage && conversation ? activeConversationKey() : '';
+    const syncActiveConversation = () => {
+      if (!activeKey) return;
+      if (document.visibilityState === 'visible' && document.hasFocus()) {
+        writeStorage(activeKey, Date.now());
+        setUnreadCount(conversation, 0);
+      } else {
+        try {
+          localStorage.removeItem(activeKey);
+        } catch (error) {
+          console.error(`MutantComms could not mark conversation "${conversation}" inactive.`, error);
+        }
+      }
+    };
+    if (activeKey) {
+      syncActiveConversation();
+      document.addEventListener('visibilitychange', syncActiveConversation);
+      window.addEventListener('focus', syncActiveConversation);
+      window.addEventListener('blur', syncActiveConversation);
+      window.setInterval(() => {
+        if (document.visibilityState === 'visible' && document.hasFocus()) {
+          writeStorage(activeKey, Date.now());
+        } else {
+          syncActiveConversation();
+        }
+      }, 5_000);
+      window.addEventListener('pagehide', () => {
+        conversationIsLeaving = true;
+        try {
+          localStorage.removeItem(activeKey);
+        } catch (error) {
+          console.error(`MutantComms could not clear active conversation "${conversation}".`, error);
+        }
+      });
+    }
 
     window.mutantCommsNotify = (name, count = 1) => {
       const key = name;
       const current = getUnreadStates();
-      if (isChatPage && conversation === key) {
+      if ((isChatPage && conversation === key && !conversationIsLeaving &&
+          document.visibilityState === 'visible' && document.hasFocus()) || hasActiveConversation(key)) {
         setUnreadCount(name, 0);
         return;
       }
@@ -1294,7 +1359,13 @@ document.addEventListener('DOMContentLoaded', () => {
       setUnreadCount(name, currentCount + Math.max(1, Number(count) || 1), true);
     };
 
-    window.addEventListener('pageshow', updateHomeUnreadStates);
+    window.addEventListener('pageshow', () => {
+      updateHomeUnreadStates();
+      syncActiveConversation();
+    });
+    window.addEventListener('storage', (event) => {
+      if (event.key === `${STORAGE_PREFIX}unread`) updateHomeUnreadStates();
+    });
   }
 
   function initializeConversationMessages() {
@@ -1384,14 +1455,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const existingIds = new Set([...messages.querySelectorAll('.message-group')]
         .map((group) => group.dataset.messageId));
+      let receivedCount = 0;
       history.forEach((record) => {
         if (!record || typeof record.id !== 'string' || existingIds.has(record.id) ||
             typeof record.text !== 'string' || typeof record.time !== 'string') return;
         messages.insertBefore(createMessageGroup(record), messages.querySelector('.typing-row'));
         existingIds.add(record.id);
+        if (record.author && record.author !== 'You') receivedCount += 1;
       });
       refreshMessageGrouping(messages);
       updateHomeConversationPreviews();
+      if (receivedCount && document.visibilityState === 'visible') setUnreadCount(conversation, 0);
     });
   }
 
@@ -1549,12 +1623,17 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error(`MutantComms cannot append to invalid message history for "${conversation}".`);
       return;
     }
-    if (!history.some((message) => message.id === record.id)) {
+    const isNewMessage = !history.some((message) => message.id === record.id);
+    let messageSaved = true;
+    if (isNewMessage) {
       history.push(record);
-      writeStorage(messageStorageKey(), history);
+      messageSaved = writeStorage(messageStorageKey(), history);
     }
     refreshMessageGrouping(document.querySelector('.chat-messages'));
     updateHomeConversationPreviews();
+    if (isNewMessage && messageSaved && record.author && record.author !== 'You') {
+      window.mutantCommsNotify?.(conversation);
+    }
   }
 
   function initializeTypingIndicator() {
@@ -1660,6 +1739,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let pendingResponse = false;
+    let pendingTurn = null;
     const updateComposer = () => {
       sendButton.disabled = input.value.trim().length === 0 || pendingResponse;
       writeStorage(draftKey, input.value);
@@ -1702,32 +1782,25 @@ document.addEventListener('DOMContentLoaded', () => {
       updateComposer();
       setTypingVisible(typing, true);
       try {
-        const response = await requestCharacterResponse(text);
+        const responseResult = requestCharacterResponse(text);
+        const response = responseResult && typeof responseResult.then === 'function'
+          ? await responseResult
+          : responseResult;
         const replies = Array.isArray(response?.messages)
           ? response.messages
           : typeof response === 'string'
             ? [{ text: response }]
             : typeof response?.text === 'string' ? [response] : [];
-        for (let index = 0; index < replies.length; index += 1) {
-          const reply = replies[index];
-          const responseText = typeof reply?.text === 'string' ? reply.text.trim() : '';
-          if (!responseText) continue;
-          if (index > 0) await waitFor(450 + Math.random() * 850);
-          const receivedAt = Date.now();
-          const receivedRecord = {
-            id: `received-${window.crypto?.randomUUID?.() || `${receivedAt.toString(36)}-${Math.random().toString(36).slice(2)}`}`,
-            author: typeof reply.author === 'string' && reply.author.trim()
-              ? displayAuthor(reply.author.trim())
-              : conversation === 'gold-squad' ? 'Gold Squad' : pageTitle,
-            text: responseText,
-            time: formatTime(new Date(receivedAt)),
-            timestamp: receivedAt
-          };
-          messages.insertBefore(createMessageGroup(receivedRecord), typing);
-          persistMessage(receivedRecord);
-          if (nearBottom) messages.scrollTop = messages.scrollHeight;
+        const turn = { replies, nextReplyIndex: 0, deliveredCount: 0, nearBottom, record };
+        pendingTurn = turn;
+        await waitFor(400 + Math.random() * 700);
+        while (pendingTurn === turn && turn.nextReplyIndex < replies.length) {
+          if (turn.deliveredCount) await waitFor(450 + Math.random() * 850);
+          if (pendingTurn !== turn) break;
+          persistNextReply(turn, true);
         }
-        if (replies.length) updateMessageReceipt(record.id, 'Seen');
+        if (pendingTurn === turn) pendingTurn = null;
+        if (turn.deliveredCount) updateMessageReceipt(record.id, 'Seen');
         if (response?.reaction && typeof window.mutantCommsAddCharacterReaction === 'function') {
           window.mutantCommsAddCharacterReaction(record.id, response.reaction);
         }
@@ -1736,6 +1809,7 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch (error) {
         console.error('MutantComms local response handler failed.', error);
       } finally {
+        if (pendingTurn?.record.id === record.id) pendingTurn = null;
         pendingResponse = false;
         updateComposer();
         setTypingVisible(typing, false);
@@ -1743,39 +1817,61 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     form.addEventListener('submit', submitMessage);
+
+    window.addEventListener('pagehide', () => {
+      if (!pendingTurn) return;
+      const turn = pendingTurn;
+      pendingTurn = null;
+      while (turn.nextReplyIndex < turn.replies.length) persistNextReply(turn, false);
+    });
+
+    function persistNextReply(turn, render) {
+      const reply = turn.replies[turn.nextReplyIndex];
+      turn.nextReplyIndex += 1;
+      const responseText = typeof reply?.text === 'string' ? reply.text.trim() : '';
+      if (!responseText) return;
+      const receivedAt = Date.now();
+      const receivedRecord = {
+        id: `received-${window.crypto?.randomUUID?.() || `${receivedAt.toString(36)}-${Math.random().toString(36).slice(2)}`}`,
+        author: typeof reply.author === 'string' && reply.author.trim()
+          ? displayAuthor(reply.author.trim())
+          : conversation === 'gold-squad' ? 'Gold Squad' : pageTitle,
+        text: responseText,
+        time: formatTime(new Date(receivedAt)),
+        timestamp: receivedAt
+      };
+      if (render) {
+        messages.insertBefore(createMessageGroup(receivedRecord), typing);
+        if (turn.nearBottom) messages.scrollTop = messages.scrollHeight;
+      }
+      persistMessage(receivedRecord);
+      turn.deliveredCount += 1;
+    }
   }
 
   function requestCharacterResponse(text) {
-    return new Promise((resolve) => {
-      window.setTimeout(() => {
-        try {
-          const handler = window.mutantCommsResponseHandler;
-          if (typeof handler === 'function') {
-            resolve(handler(text));
-            return;
-          }
-          const engine = window.MutantCommsConversationEngine;
-          if (!engine) {
-            console.error('MutantComms could not find its local conversation engine.');
-            resolve(null);
-            return;
-          }
-          const participants = [...document.querySelectorAll('.info-panel li')]
-            .map((member) => member.textContent.trim())
-            .filter(Boolean);
-          resolve(engine.respond({
-            conversationId: conversation,
-            character: pageTitle,
-            text,
-            participants,
-            spicyMode
-          }));
-        } catch (error) {
-          console.error('MutantComms local response handler failed.', error);
-          resolve(null);
-        }
-      }, 400 + Math.random() * 700);
-    });
+    try {
+      const handler = window.mutantCommsResponseHandler;
+      if (typeof handler === 'function') return handler(text);
+      const engine = window.MutantCommsConversationEngine;
+      if (!engine) {
+        console.error('MutantComms could not find its local conversation engine.');
+        return null;
+      }
+      const participants = [...document.querySelectorAll('.info-panel li')]
+        .map((member) => member.textContent.trim())
+        .filter(Boolean);
+      return engine.respond({
+        conversationId: conversation,
+        character: pageTitle,
+        text,
+        participants,
+        spicyMode
+      });
+    } catch (error) {
+      console.error('MutantComms local response handler failed.', error);
+      return null;
+    }
   }
 
   function waitFor(milliseconds) {
